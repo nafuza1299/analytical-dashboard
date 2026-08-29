@@ -257,7 +257,7 @@ function App() {
                   canCapture={canCapture}
                   periodLabel={periodLabel}
                 >
-                  <IndicatorLineChart rows={data} indicatorName={indicatorName} />
+                  <IndicatorLineChart rows={data} />
                 </ChartCard>
               </div>
               <div key="bar">
@@ -269,7 +269,7 @@ function App() {
                   canCapture={canCapture}
                   periodLabel={periodLabel}
                 >
-                  <IndicatorBarChart rows={data} indicatorName={indicatorName} />
+                  <IndicatorBarChart rows={data} />
                 </ChartCard>
               </div>
               <div key="pie">

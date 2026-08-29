@@ -17,8 +17,11 @@ export function formatFull(value: number): string {
   return fullFormatter.format(value)
 }
 
+// Matches Card.Title's "text-base font-semibold" so axis numbers read like the chart title.
+export const axisTickStyle = { fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 600 }
+
 // Skips overlapping ticks instead of rotating/truncating labels.
-export const xAxisTickProps = { interval: 'preserveStartEnd' as const }
+export const xAxisTickProps = { interval: 'preserveStartEnd' as const, tick: axisTickStyle }
 
 // Right-side, smaller-font legend shared by every chart that has one.
 // maxHeight + overflowY caps it so a long country list scrolls instead of

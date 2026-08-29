@@ -1,3 +1,5 @@
+import { COUNTRY_CODES } from '../data/countries'
+
 export type FilterScope = 'global' | 'page'
 
 export interface FilterDef<T> {
@@ -10,12 +12,14 @@ export interface FilterDef<T> {
 }
 
 const COUNTRY_CODE = /^[A-Z]{2,3}$/
-const MAX_COUNTRIES = 10
+// Sized to admit "all curated countries selected" as the default — the UI
+// only ever offers codes from that same curated list anyway.
+export const MAX_COUNTRIES = COUNTRY_CODES.length
 
 export const countriesFilter: FilterDef<string[]> = {
   id: 'countries',
   scope: 'global',
-  default: ['IDN'],
+  default: COUNTRY_CODES,
   serialize: (codes) => codes.join(','),
   parse: (raw) => {
     const codes = raw
@@ -27,7 +31,7 @@ export const countriesFilter: FilterDef<string[]> = {
   },
 }
 
-const MIN_YEAR = 1960
+export const MIN_YEAR = 1960
 const currentYear = () => new Date().getFullYear()
 
 export const yearRangeFilter: FilterDef<[number, number]> = {

@@ -10,6 +10,7 @@ import { Col } from './catalyst-ui/components/Grid/Col'
 import { Card } from './catalyst-ui/components/Card/Card'
 import { Button } from './catalyst-ui/components/Button/Button'
 import { useFilters } from './filters/useFilters'
+import { FiltersBar } from './filters/FiltersBar'
 import { fetchIndicatorData } from './api/worldBank'
 import { IndicatorLineChart } from './charts/IndicatorLineChart'
 import { IndicatorBarChart } from './charts/IndicatorBarChart'
@@ -130,14 +131,7 @@ function App() {
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mb-4">
-          <Button variant="ghost" size="sm" onClick={() => setFilter('countries', ['IDN', 'SGP', 'MYS'])}>
-            IDN, SGP, MYS
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setFilter('countries', ['USA', 'CHN', 'JPN'])}>
-            USA, CHN, JPN
-          </Button>
-        </div>
+        <FiltersBar values={values} setFilter={setFilter} />
 
         {/* Vertically centers the chart block in whatever space is left below
             the toolbar — "safe" so tall content (many charts, a long table)

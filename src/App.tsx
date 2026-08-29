@@ -23,7 +23,6 @@ import { latestYearRows } from './charts/latestYearRows'
 import { isAdditiveIndicator } from './charts/additiveIndicators'
 import { buildExportFilename } from './export/exportToExcel'
 import { CaptureButton } from './export/CaptureButton'
-import { formatFilterSummary } from './export/filterSummary'
 import { findTabByIndicator, MENUS } from './navigation/menus'
 import { PageChartGrid } from './layout/PageChartGrid'
 import { clearLayoutCache } from './layout/gridLayout'
@@ -89,9 +88,7 @@ function App() {
     data && isAdditiveIndicator(values.indicator)
       ? latestYearRows(data).filter((r) => r.value !== null && r.value > 0)
       : []
-  const countryNames = data ? [...new Map(data.map((r) => [r.countryCode, r.countryName])).values()] : []
   const indicatorName = data?.[0]?.indicatorName ?? location.tab.label
-  const filterSummary = formatFilterSummary(indicatorName, countryNames, values.yearRange)
   const periodLabel = `${values.yearRange[0]}–${values.yearRange[1]}`
   const filenameFor = (kind: string, ext: 'xlsx' | 'png' | 'pdf') =>
     buildExportFilename(indicatorName, values.countries, values.yearRange, kind, ext)
@@ -241,8 +238,6 @@ function App() {
         )}
 
         {!isLoading && !error && data && data.length > 0 && (
-          <>
-            <p className="text-sm text-text-muted mb-3">{filterSummary}</p>
             <PageChartGrid
               key={`${values.indicator}-${layoutResetNonce}`}
               pageKey={values.indicator}
@@ -300,7 +295,6 @@ function App() {
                 </ChartCard>
               </div>
             </PageChartGrid>
-          </>
         )}
         </div>
         </div>

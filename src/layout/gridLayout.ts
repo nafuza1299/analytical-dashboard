@@ -44,3 +44,13 @@ export function writeLayoutCache(pageKey: string, layouts: ResponsiveLayouts<str
     // storage disabled/full — layout just won't persist across sessions
   }
 }
+
+export function clearLayoutCache(pageKey: string) {
+  try {
+    const all = readAllLayouts()
+    delete all[pageKey]
+    localStorage.setItem(CACHE_KEY, JSON.stringify(all))
+  } catch {
+    // storage disabled — nothing was persisted to clear anyway
+  }
+}

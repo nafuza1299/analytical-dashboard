@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useContainerWidth } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
@@ -22,6 +22,7 @@ import { CaptureButton } from './export/CaptureButton'
 import { formatFilterSummary } from './export/filterSummary'
 import { findTabByIndicator, MENUS } from './navigation/menus'
 import { PageChartGrid } from './layout/PageChartGrid'
+import { clearLayoutCache } from './layout/gridLayout'
 
 function App() {
   const { values, setFilter } = useFilters(['countries', 'yearRange', 'indicator'] as const)
@@ -43,6 +44,10 @@ function App() {
   const pageRef = useRef<HTMLDivElement>(null)
 
   const { width: gridWidth, containerRef: gridContainerRef } = useContainerWidth()
+  // Bumped to force PageChartGrid to remount (and re-read the now-cleared
+  // cache) when "Clear layout" is pressed — the page key itself doesn't
+  // change, so a remount has to be triggered some other way.
+  const [layoutResetNonce, setLayoutResetNonce] = useState(0)
 
   const barRows = data ? latestYearRows(data) : []
   const pieRows =
@@ -105,6 +110,19 @@ function App() {
               label="Capture everything (PDF)"
             />
           )}
+          {canCapture && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-auto"
+              onClick={() => {
+                clearLayoutCache(values.indicator)
+                setLayoutResetNonce((n) => n + 1)
+              }}
+            >
+              Clear layout
+            </Button>
+          )}
         </div>
 
         {isLoading && (
@@ -145,10 +163,14 @@ function App() {
         )}
 
         {!isLoading && !error && data && data.length > 0 && (
-          <div ref={pageRef}>
+          <div ref={pageRef} className="max-w-[1400px] mx-auto">
             <p className="text-sm text-text-muted mb-3">{filterSummary}</p>
             <div ref={gridContainerRef}>
-              <PageChartGrid key={values.indicator} pageKey={values.indicator} width={gridWidth}>
+              <PageChartGrid
+                key={`${values.indicator}-${layoutResetNonce}`}
+                pageKey={values.indicator}
+                width={gridWidth}
+              >
                 <div key="line">
                   <Card className="h-full flex flex-col">
                     <Card.Header

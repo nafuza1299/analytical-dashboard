@@ -117,3 +117,9 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
 }
+
+/* react-resizable's handle glyph is a fixed black SVG; invert it in dark
+   mode instead of shipping a second asset. */
+[data-theme="dark"] .react-resizable-handle {
+  filter: invert(1);
+}

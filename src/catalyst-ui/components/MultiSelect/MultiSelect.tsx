@@ -1,7 +1,7 @@
 import Select, {
   components as RSComponents,
   type ClassNamesConfig,
-  type MenuListProps,
+  type MenuProps,
   type MultiValue as RSMultiValue,
   type MultiValueProps,
   type OptionProps,
@@ -84,20 +84,20 @@ export function MultiSelect({ label, options, value, onChange, max, min = 0 }: M
     </span>
   )
 
-  const MenuList = (props: MenuListProps<MultiSelectOption, true>) => (
-    <RSComponents.MenuList {...props}>
+  const Menu = (props: MenuProps<MultiSelectOption, true>) => (
+    <RSComponents.Menu {...props}>
+      {props.children}
       {value.length > min && (
         <button
           type="button"
           onMouseDown={(e) => e.preventDefault()}
           onClick={() => onChange(value.slice(0, min))}
-          className="w-full text-left px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text hover:bg-surface-hover border-b border-border"
+          className="w-full text-left px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text hover:bg-surface-hover border-t border-border"
         >
           Clear all
         </button>
       )}
-      {props.children}
-    </RSComponents.MenuList>
+    </RSComponents.Menu>
   )
 
   return (
@@ -119,7 +119,7 @@ export function MultiSelect({ label, options, value, onChange, max, min = 0 }: M
         isOptionDisabled={(option) =>
           value.includes(option.value) ? value.length <= min : max !== undefined && value.length >= max
         }
-        components={{ Option, MultiValue, MenuList }}
+        components={{ Option, MultiValue, Menu }}
         classNames={classNames}
         menuPortalTarget={document.body}
         className="w-64"

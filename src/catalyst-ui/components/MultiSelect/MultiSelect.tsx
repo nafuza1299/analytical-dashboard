@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Select, {
   components as RSComponents,
   type ClassNamesConfig,
@@ -44,37 +45,53 @@ const classNames: ClassNamesConfig<MultiSelectOption, true> = {
 }
 
 export function MultiSelect({ label, options, value, onChange, max, min = 0 }: MultiSelectProps) {
+  // While the dropdown is open, edits are buffered here instead of calling
+  // `onChange` immediately — checkmarks/count reflect this live, but chips
+  // and everything outside the dropdown stay on `value` until it closes.
+  const [pending, setPending] = useState<string[] | null>(null)
+  const effective = pending ?? value
   const selected = options.filter((o) => value.includes(o.value))
 
+  const commitChange = (next: string[]) => {
+    if (pending !== null) setPending(next)
+    else onChange(next)
+  }
+
   const toggle = (code: string) => {
-    const checked = value.includes(code)
+    const checked = effective.includes(code)
     if (checked) {
-      if (value.length <= min) return
-      onChange(value.filter((v) => v !== code))
+      if (effective.length <= min) return
+      commitChange(effective.filter((v) => v !== code))
     } else {
-      if (max !== undefined && value.length >= max) return
-      onChange([...value, code])
+      if (max !== undefined && effective.length >= max) return
+      commitChange([...effective, code])
     }
   }
 
-  const Option = ({ data, isSelected, isDisabled, isFocused, innerRef, innerProps }: OptionProps<MultiSelectOption, true>) => (
-    <div
-      ref={innerRef}
-      {...innerProps}
-      className={[
-        'flex items-center justify-between gap-2 px-3 py-1.5 text-sm text-text',
-        isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
-        isSelected ? 'bg-primary/10' : isFocused ? 'bg-surface-hover' : '',
-      ].join(' ')}
-    >
-      {data.label}
-      {isSelected && (
-        <span aria-hidden="true" className="text-primary">
-          ✓
-        </span>
-      )}
-    </div>
-  )
+  // Checkmarks reflect the live in-progress `effective` selection, not
+  // react-select's own `isSelected` (which is derived from the frozen
+  // `selected`/`value` passed to the Select below).
+  const Option = ({ data, isDisabled, isFocused, innerRef, innerProps }: OptionProps<MultiSelectOption, true>) => {
+    const checked = effective.includes(data.value)
+    return (
+      <div
+        ref={innerRef}
+        {...innerProps}
+        className={[
+          'flex items-center justify-between gap-2 px-3 py-1.5 text-sm text-text',
+          isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+          checked ? 'bg-primary/10' : isFocused ? 'bg-surface-hover' : '',
+        ].join(' ')}
+      >
+        {data.label}
+        {checked && (
+          <span aria-hidden="true" className="text-primary">
+            ✓
+          </span>
+        )}
+      </div>
+    )
+  }
 
   const MultiValue = ({ data }: MultiValueProps<MultiSelectOption, true>) => (
     <span onMouseDown={(e) => e.stopPropagation()}>
@@ -89,23 +106,23 @@ export function MultiSelect({ label, options, value, onChange, max, min = 0 }: M
   const Menu = (props: MenuProps<MultiSelectOption, true>) => (
     <RSComponents.Menu {...props}>
       {props.children}
-      {(value.length > min || value.length < selectableCount) && (
+      {(effective.length > min || effective.length < selectableCount) && (
         <div className="flex border-t border-border">
-          {value.length < selectableCount && (
+          {effective.length < selectableCount && (
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => onChange(options.slice(0, selectableCount).map((o) => o.value))}
+              onClick={() => commitChange(options.slice(0, selectableCount).map((o) => o.value))}
               className="flex-1 text-left px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text hover:bg-surface-hover"
             >
               Select all
             </button>
           )}
-          {value.length > min && (
+          {effective.length > min && (
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
-              onClick={() => onChange(value.slice(0, min))}
+              onClick={() => commitChange(effective.slice(0, min))}
               className="flex-1 text-left px-3 py-1.5 text-xs font-medium text-danger hover:bg-danger/10 border-l border-border"
             >
               Clear all
@@ -119,7 +136,7 @@ export function MultiSelect({ label, options, value, onChange, max, min = 0 }: M
   return (
     <div className="flex flex-col gap-1">
       <span className="text-sm font-medium text-text">
-        {label} ({value.length})
+        {label} ({effective.length})
       </span>
       <Select<MultiSelectOption, true>
         inputId={`multiselect-${label}`}
@@ -131,9 +148,14 @@ export function MultiSelect({ label, options, value, onChange, max, min = 0 }: M
         isClearable={false}
         options={options}
         value={selected}
-        onChange={(next: RSMultiValue<MultiSelectOption>) => onChange(next.map((o) => o.value))}
+        onChange={(next: RSMultiValue<MultiSelectOption>) => commitChange(next.map((o) => o.value))}
+        onMenuOpen={() => setPending(value)}
+        onMenuClose={() => {
+          onChange(pending ?? value)
+          setPending(null)
+        }}
         isOptionDisabled={(option) =>
-          value.includes(option.value) ? value.length <= min : max !== undefined && value.length >= max
+          effective.includes(option.value) ? effective.length <= min : max !== undefined && effective.length >= max
         }
         components={{ Option, MultiValue, Menu }}
         classNames={classNames}

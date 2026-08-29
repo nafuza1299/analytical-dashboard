@@ -130,7 +130,7 @@ function App() {
       </AppLayout.Sider>
 
       <div className="flex flex-1 min-w-0 flex-col">
-      <div className="flex items-end gap-1 overflow-x-auto border-b border-border bg-surface px-3 pt-2">
+      <div className="flex items-end gap-1 overflow-x-auto border-b border-border bg-surface px-3 pt-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {location.menu.tabs.map((tab) => {
           const active = tab.key === location.tab.key
           return (

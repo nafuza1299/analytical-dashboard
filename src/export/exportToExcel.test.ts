@@ -13,4 +13,10 @@ describe('buildExportFilename', () => {
       'life-expectancy-at-birth_vnm_2000-2020_bar.xlsx',
     )
   })
+
+  it('uses the given extension instead of defaulting to xlsx', () => {
+    expect(buildExportFilename('GDP', ['IDN'], [2015, 2024], 'line', 'png')).toBe(
+      'gdp_idn_2015-2024_line.png',
+    )
+  })
 })

@@ -13,10 +13,11 @@ export function buildExportFilename(
   countries: string[],
   yearRange: [number, number],
   kind: string,
+  ext: 'xlsx' | 'png' | 'pdf' = 'xlsx',
 ): string {
   const indicatorSlug = slugify(indicatorName)
   const countrySlug = countries.map((c) => c.toLowerCase()).join('-')
-  return `${indicatorSlug}_${countrySlug}_${yearRange[0]}-${yearRange[1]}_${kind}.xlsx`
+  return `${indicatorSlug}_${countrySlug}_${yearRange[0]}-${yearRange[1]}_${kind}.${ext}`
 }
 
 /** Exports the same normalized rows a chart renders — never the raw API response. */

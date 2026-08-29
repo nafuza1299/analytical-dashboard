@@ -101,11 +101,44 @@ function App() {
           )}
         </div>
 
-        {isLoading && <p className="text-text-muted">Loading…</p>}
-        {error && <p className="text-danger">Failed to load: {error.message}</p>}
-        {data && data.length === 0 && <p className="text-text-muted">No data</p>}
+        {isLoading && (
+          <Row gutter={16}>
+            {[0, 1, 2, 3].map((i) => (
+              <Col key={i} span={12} lg={6}>
+                <Card loading />
+              </Col>
+            ))}
+          </Row>
+        )}
 
-        {data && data.length > 0 && (
+        {!isLoading && error && (
+          <Card>
+            <Card.Body>
+              <p className="text-danger font-medium mb-1">
+                Couldn't load {location.tab.label.toLowerCase()} data
+              </p>
+              <p className="text-sm text-text-muted mb-4">{error.message}</p>
+              <Button variant="secondary" size="sm" onClick={() => refetch()}>
+                Retry
+              </Button>
+            </Card.Body>
+          </Card>
+        )}
+
+        {!isLoading && !error && data && data.length === 0 && (
+          <Card>
+            <Card.Body>
+              <p className="text-text font-medium mb-1">No data for this selection</p>
+              <p className="text-sm text-text-muted">
+                The World Bank has no {location.tab.label.toLowerCase()} data for{' '}
+                {values.countries.join(', ')} in {values.yearRange[0]}–{values.yearRange[1]}. Try a
+                different country or year range.
+              </p>
+            </Card.Body>
+          </Card>
+        )}
+
+        {!isLoading && !error && data && data.length > 0 && (
           <div ref={pageRef}>
             <p className="text-sm text-text-muted mb-3">{filterSummary}</p>
             <Row gutter={16}>

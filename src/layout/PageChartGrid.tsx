@@ -6,7 +6,7 @@ import {
   type Layout,
   type ResponsiveLayouts,
 } from 'react-grid-layout'
-import { DEFAULT_LAYOUT, readLayoutCache, writeLayoutCache } from './gridLayout'
+import { DEFAULT_LAYOUTS, readLayoutCache, writeLayoutCache } from './gridLayout'
 
 interface Props {
   pageKey: string
@@ -26,7 +26,7 @@ interface Props {
  */
 export function PageChartGrid({ pageKey, width, children }: Props) {
   const [layouts, setLayouts] = useState<ResponsiveLayouts<string>>(
-    () => readLayoutCache(pageKey) ?? { lg: DEFAULT_LAYOUT },
+    () => readLayoutCache(pageKey) ?? DEFAULT_LAYOUTS,
   )
 
   const handleLayoutChange = (_layout: Layout, allLayouts: ResponsiveLayouts<string>) => {

@@ -1,4 +1,4 @@
-import type { Layout, ResponsiveLayouts } from 'react-grid-layout'
+import { DEFAULT_COLS, type Layout, type ResponsiveLayouts } from 'react-grid-layout'
 
 const CACHE_KEY = 'layout.v1'
 
@@ -7,16 +7,32 @@ const CACHE_KEY = 'layout.v1'
 // allows is fine.
 const MIN_W = 3
 const MIN_H = 8
+const ITEMS = ['line', 'bar', 'pie', 'table']
 
-// Only the widest breakpoint is authored by hand; react-grid-layout derives
-// reasonable layouts for md/sm/xs/xxs from this one automatically — manually
-// tuning every breakpoint is the real time sink the plan warns about.
-export const DEFAULT_LAYOUT: Layout = [
-  { i: 'line', x: 0, y: 0, w: 6, h: 16, minW: MIN_W, minH: MIN_H },
-  { i: 'bar', x: 6, y: 0, w: 6, h: 16, minW: MIN_W, minH: MIN_H },
-  { i: 'pie', x: 0, y: 16, w: 6, h: 16, minW: MIN_W, minH: MIN_H },
-  { i: 'table', x: 6, y: 16, w: 6, h: 16, minW: MIN_W, minH: MIN_H },
-]
+// react-grid-layout only auto-derives a missing breakpoint's layout by
+// copying+clamping the nearest larger one, it doesn't rescale item widths —
+// so a layout authored only for `lg` (12 cols) overflows its container once
+// the grid drops to md/sm cols and gets clipped on the right, reading as
+// pushed left. Sizing each breakpoint from its own `cols` avoids that: two
+// side-by-side at MIN_W or wider, one full-width column below that.
+function layoutForCols(cols: number): Layout {
+  if (cols >= MIN_W * 2) {
+    const w = Math.floor(cols / 2)
+    return [
+      { i: 'line', x: 0, y: 0, w, h: 16, minW: MIN_W, minH: MIN_H },
+      { i: 'bar', x: w, y: 0, w, h: 16, minW: MIN_W, minH: MIN_H },
+      { i: 'pie', x: 0, y: 16, w, h: 16, minW: MIN_W, minH: MIN_H },
+      { i: 'table', x: w, y: 16, w, h: 16, minW: MIN_W, minH: MIN_H },
+    ]
+  }
+  return ITEMS.map((i, idx) => ({ i, x: 0, y: idx * 16, w: cols, h: 16, minW: MIN_W, minH: MIN_H }))
+}
+
+export const DEFAULT_LAYOUT: Layout = layoutForCols(DEFAULT_COLS.lg)
+
+export const DEFAULT_LAYOUTS: ResponsiveLayouts<string> = Object.fromEntries(
+  Object.entries(DEFAULT_COLS).map(([breakpoint, cols]) => [breakpoint, layoutForCols(cols)]),
+)
 
 // Keyed by page (the active indicator code) so rearranging the GDP page's
 // charts doesn't touch the Life Expectancy page's arrangement.

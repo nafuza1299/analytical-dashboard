@@ -5,6 +5,7 @@ import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import { Layout as AppLayout } from './catalyst-ui/components/Layout/Layout'
 import { MenuBar } from './catalyst-ui/components/MenuBar/MenuBar'
+import { ThemeToggle } from './catalyst-ui/components/ThemeToggle/ThemeToggle'
 import { SideNav } from './catalyst-ui/components/SideNav/SideNav'
 import { Row } from './catalyst-ui/components/Grid/Row'
 import { Col } from './catalyst-ui/components/Grid/Col'
@@ -91,6 +92,7 @@ function App() {
   const countryNames = data ? [...new Map(data.map((r) => [r.countryCode, r.countryName])).values()] : []
   const indicatorName = data?.[0]?.indicatorName ?? location.tab.label
   const filterSummary = formatFilterSummary(indicatorName, countryNames, values.yearRange)
+  const periodLabel = `${values.yearRange[0]}–${values.yearRange[1]}`
   const filenameFor = (kind: string, ext: 'xlsx' | 'png' | 'pdf') =>
     buildExportFilename(indicatorName, values.countries, values.yearRange, kind, ext)
 
@@ -111,6 +113,9 @@ function App() {
             </button>
             Analytical Dashboard
           </MenuBar.Brand>
+          <MenuBar.Actions>
+            <ThemeToggle />
+          </MenuBar.Actions>
         </MenuBar>
       </AppLayout.Header>
 
@@ -250,7 +255,7 @@ function App() {
                   exportFilename={filenameFor('line', 'xlsx')}
                   captureFilename={filenameFor('line', 'png')}
                   canCapture={canCapture}
-                  filterSummary={filterSummary}
+                  periodLabel={periodLabel}
                 >
                   <IndicatorLineChart rows={data} indicatorName={indicatorName} />
                 </ChartCard>
@@ -262,7 +267,7 @@ function App() {
                   exportFilename={filenameFor('bar', 'xlsx')}
                   captureFilename={filenameFor('bar', 'png')}
                   canCapture={canCapture}
-                  filterSummary={filterSummary}
+                  periodLabel={periodLabel}
                 >
                   <IndicatorBarChart rows={data} indicatorName={indicatorName} />
                 </ChartCard>
@@ -274,7 +279,7 @@ function App() {
                   exportFilename={filenameFor('pie', 'xlsx')}
                   captureFilename={filenameFor('pie', 'png')}
                   canCapture={canCapture && pieRows.length > 0}
-                  filterSummary={filterSummary}
+                  periodLabel={periodLabel}
                 >
                   <IndicatorPieChart rows={data} indicatorCode={values.indicator} />
                   <p className="text-sm text-text-muted">
@@ -289,7 +294,7 @@ function App() {
                   exportFilename={filenameFor('table', 'xlsx')}
                   captureFilename={filenameFor('table', 'png')}
                   canCapture={canCapture}
-                  filterSummary={filterSummary}
+                  periodLabel={periodLabel}
                 >
                   <DataTable rows={data} />
                 </ChartCard>

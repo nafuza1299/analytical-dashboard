@@ -6,22 +6,22 @@ import type { DataRow } from '../api/worldBank'
 
 interface Props {
   title: string
+  periodLabel: string
   exportRows: DataRow[]
   exportFilename: string
   captureFilename: string
   canCapture: boolean
-  filterSummary: string
   children: ReactNode
 }
 
 /** The header/export/capture chrome shared by every chart card in the grid. */
 export function ChartCard({
   title,
+  periodLabel,
   exportRows,
   exportFilename,
   captureFilename,
   canCapture,
-  filterSummary,
   children,
 }: Props) {
   const captureRef = useRef<HTMLDivElement>(null)
@@ -29,17 +29,17 @@ export function ChartCard({
   return (
     <Card className="h-full flex flex-col">
       <Card.Header className="flex items-center justify-between drag-handle cursor-grab active:cursor-grabbing">
-        <Card.Title>{title}</Card.Title>
+        <hgroup>
+          <p className="text-xs text-text-muted">{periodLabel}</p>
+          <Card.Title>{title}</Card.Title>
+        </hgroup>
         <div className="flex gap-2">
           <ExportButton rows={exportRows} filename={exportFilename} />
           {canCapture && <CaptureButton targetRef={captureRef} filename={captureFilename} format="png" />}
         </div>
       </Card.Header>
       <Card.Body className="flex-1 overflow-auto">
-        <div ref={captureRef}>
-          <p className="text-xs text-text-muted mb-2">{filterSummary}</p>
-          {children}
-        </div>
+        <div ref={captureRef}>{children}</div>
       </Card.Body>
     </Card>
   )

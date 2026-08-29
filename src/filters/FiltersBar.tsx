@@ -38,7 +38,7 @@ export function FiltersBar({ values, setFilter }: FiltersBarProps) {
   }
 
   return (
-    <Card padding="sm" className="mb-4">
+    <Card padding="sm">
       <div className="flex flex-wrap items-start gap-4">
         <MultiSelect
           label="Countries"

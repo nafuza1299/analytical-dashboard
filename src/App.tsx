@@ -136,6 +136,7 @@ function App() {
       </AppLayout.Sider>
 
       <div className="flex flex-1 min-w-0 flex-col">
+      <div className="sticky top-0 z-20 bg-bg pb-4">
       <div className="flex items-end gap-1 overflow-x-auto border-b border-border bg-surface px-3 pt-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {location.menu.tabs.map((tab) => {
           const active = tab.key === location.tab.key
@@ -156,6 +157,9 @@ function App() {
             </button>
           )
         })}
+      </div>
+
+      <FiltersBar values={values} setFilter={setFilter} />
       </div>
 
       <AppLayout.Content>
@@ -179,8 +183,6 @@ function App() {
             </Button>
           </div>
         )}
-
-        <FiltersBar values={values} setFilter={setFilter} />
 
         {/* Vertically centers the chart block in whatever space is left below
             the toolbar — "safe" so tall content (many charts, a long table)

@@ -43,7 +43,7 @@ export function PageChartGrid({ pageKey, width, children }: Props) {
       rowHeight={24}
       margin={[16, 16]}
       dragConfig={{ enabled: true, handle: '.drag-handle' }}
-      resizeConfig={{ enabled: true }}
+      resizeConfig={{ enabled: true, handles: ['se', 'sw', 'ne', 'nw'] }}
       onLayoutChange={handleLayoutChange}
     >
       {children}

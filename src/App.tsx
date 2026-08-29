@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { useContainerWidth } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
@@ -42,7 +42,6 @@ function App() {
   const tableRef = useRef<HTMLDivElement>(null)
   const pageRef = useRef<HTMLDivElement>(null)
 
-  const [editingLayout, setEditingLayout] = useState(false)
   const { width: gridWidth, containerRef: gridContainerRef } = useContainerWidth()
 
   const barRows = data ? latestYearRows(data) : []
@@ -106,15 +105,6 @@ function App() {
               label="Capture everything (PDF)"
             />
           )}
-          {canCapture && (
-            <Button
-              variant={editingLayout ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setEditingLayout((v) => !v)}
-            >
-              {editingLayout ? 'Done editing layout' : 'Edit layout'}
-            </Button>
-          )}
         </div>
 
         {isLoading && (
@@ -158,11 +148,11 @@ function App() {
           <div ref={pageRef}>
             <p className="text-sm text-text-muted mb-3">{filterSummary}</p>
             <div ref={gridContainerRef}>
-              <PageChartGrid key={values.indicator} pageKey={values.indicator} editing={editingLayout} width={gridWidth}>
+              <PageChartGrid key={values.indicator} pageKey={values.indicator} width={gridWidth}>
                 <div key="line">
                   <Card className="h-full flex flex-col">
                     <Card.Header
-                      className={`flex items-center justify-between ${editingLayout ? 'drag-handle cursor-move' : ''}`}
+                      className="flex items-center justify-between drag-handle cursor-grab active:cursor-grabbing"
                     >
                       <Card.Title>{indicatorName} over time</Card.Title>
                       <div className="flex gap-2">
@@ -183,7 +173,7 @@ function App() {
                 <div key="bar">
                   <Card className="h-full flex flex-col">
                     <Card.Header
-                      className={`flex items-center justify-between ${editingLayout ? 'drag-handle cursor-move' : ''}`}
+                      className="flex items-center justify-between drag-handle cursor-grab active:cursor-grabbing"
                     >
                       <Card.Title>{indicatorName} by country</Card.Title>
                       <div className="flex gap-2">
@@ -204,7 +194,7 @@ function App() {
                 <div key="pie">
                   <Card className="h-full flex flex-col">
                     <Card.Header
-                      className={`flex items-center justify-between ${editingLayout ? 'drag-handle cursor-move' : ''}`}
+                      className="flex items-center justify-between drag-handle cursor-grab active:cursor-grabbing"
                     >
                       <Card.Title>Share of total</Card.Title>
                       <div className="flex gap-2">
@@ -228,7 +218,7 @@ function App() {
                 <div key="table">
                   <Card className="h-full flex flex-col">
                     <Card.Header
-                      className={`flex items-center justify-between ${editingLayout ? 'drag-handle cursor-move' : ''}`}
+                      className="flex items-center justify-between drag-handle cursor-grab active:cursor-grabbing"
                     >
                       <Card.Title>Raw data</Card.Title>
                       <div className="flex gap-2">

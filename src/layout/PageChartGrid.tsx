@@ -10,7 +10,6 @@ import { DEFAULT_LAYOUT, readLayoutCache, writeLayoutCache } from './gridLayout'
 
 interface Props {
   pageKey: string
-  editing: boolean
   width: number
   children: ReactNode
 }
@@ -21,8 +20,11 @@ interface Props {
  * (e.g. switching tabs without remounting) is not enough to pick up a
  * different page's cached arrangement, so each page needs a fresh instance
  * rather than one shared instance juggling a changing `layouts` prop.
+ *
+ * Dragging/resizing is always on — grab a card by its `.drag-handle` header
+ * and reorder directly, no separate edit mode to toggle first.
  */
-export function PageChartGrid({ pageKey, editing, width, children }: Props) {
+export function PageChartGrid({ pageKey, width, children }: Props) {
   const [layouts, setLayouts] = useState<ResponsiveLayouts<string>>(
     () => readLayoutCache(pageKey) ?? { lg: DEFAULT_LAYOUT },
   )
@@ -40,8 +42,8 @@ export function PageChartGrid({ pageKey, editing, width, children }: Props) {
       cols={DEFAULT_COLS}
       rowHeight={24}
       margin={[16, 16]}
-      dragConfig={{ enabled: editing, handle: '.drag-handle' }}
-      resizeConfig={{ enabled: editing }}
+      dragConfig={{ enabled: true, handle: '.drag-handle' }}
+      resizeConfig={{ enabled: true }}
       onLayoutChange={handleLayoutChange}
     >
       {children}

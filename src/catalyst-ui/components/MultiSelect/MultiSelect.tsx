@@ -1,5 +1,7 @@
 import Select, {
+  components as RSComponents,
   type ClassNamesConfig,
+  type MenuListProps,
   type MultiValue as RSMultiValue,
   type MultiValueProps,
   type OptionProps,
@@ -82,22 +84,27 @@ export function MultiSelect({ label, options, value, onChange, max, min = 0 }: M
     </span>
   )
 
+  const MenuList = (props: MenuListProps<MultiSelectOption, true>) => (
+    <RSComponents.MenuList {...props}>
+      {value.length > min && (
+        <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => onChange(value.slice(0, min))}
+          className="w-full text-left px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text hover:bg-surface-hover border-b border-border"
+        >
+          Clear all
+        </button>
+      )}
+      {props.children}
+    </RSComponents.MenuList>
+  )
+
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium text-text">
-          {label} ({value.length})
-        </span>
-        {value.length > min && (
-          <button
-            type="button"
-            onClick={() => onChange(value.slice(0, min))}
-            className="text-xs text-text-muted hover:text-text underline underline-offset-2"
-          >
-            Clear all
-          </button>
-        )}
-      </div>
+      <span className="text-sm font-medium text-text">
+        {label} ({value.length})
+      </span>
       <Select<MultiSelectOption, true>
         inputId={`multiselect-${label}`}
         aria-label={label}
@@ -112,7 +119,7 @@ export function MultiSelect({ label, options, value, onChange, max, min = 0 }: M
         isOptionDisabled={(option) =>
           value.includes(option.value) ? value.length <= min : max !== undefined && value.length >= max
         }
-        components={{ Option, MultiValue }}
+        components={{ Option, MultiValue, MenuList }}
         classNames={classNames}
         menuPortalTarget={document.body}
         className="w-64"

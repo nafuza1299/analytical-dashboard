@@ -5,6 +5,7 @@ import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import { Layout as AppLayout } from './catalyst-ui/components/Layout/Layout'
 import { MenuBar } from './catalyst-ui/components/MenuBar/MenuBar'
+import { SideNav } from './catalyst-ui/components/SideNav/SideNav'
 import { Row } from './catalyst-ui/components/Grid/Row'
 import { Col } from './catalyst-ui/components/Grid/Col'
 import { Card } from './catalyst-ui/components/Card/Card'
@@ -67,6 +68,14 @@ function App() {
   // cache) when "Clear layout" is pressed — the page key itself doesn't
   // change, so a remount has to be triggered some other way.
   const [layoutResetNonce, setLayoutResetNonce] = useState(0)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  // One toggle drives both: only one of Sider-collapse (desktop) or the
+  // drawer (mobile) is ever visible at a time, so flipping both is harmless.
+  const toggleSidebar = () => {
+    setSidebarCollapsed((c) => !c)
+    setMobileNavOpen((o) => !o)
+  }
 
   const barRows = data ? latestYearRows(data) : []
   const pieRows =
@@ -85,20 +94,40 @@ function App() {
     <AppLayout>
       <AppLayout.Header>
         <MenuBar>
-          <MenuBar.Brand>Analytical Dashboard</MenuBar.Brand>
-          <MenuBar.Nav>
-            {MENUS.map((menu) => (
-              <MenuBar.Link
-                key={menu.key}
-                active={location.menu.key === menu.key}
-                onClick={() => setFilter('indicator', menu.tabs[0].indicatorCode)}
-              >
-                {menu.label}
-              </MenuBar.Link>
-            ))}
-          </MenuBar.Nav>
+          <MenuBar.Brand>
+            <button
+              type="button"
+              aria-label="Toggle navigation"
+              className="mr-3 flex h-8 w-8 items-center justify-center rounded-md text-text-muted hover:bg-surface-hover hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              onClick={toggleSidebar}
+            >
+              ☰
+            </button>
+            Analytical Dashboard
+          </MenuBar.Brand>
         </MenuBar>
       </AppLayout.Header>
+
+      <AppLayout hasSider>
+      <AppLayout.Sider
+        width={240}
+        collapsible
+        collapsed={sidebarCollapsed}
+        onCollapse={setSidebarCollapsed}
+        breakpoint="lg"
+      >
+        <SideNav
+          items={MENUS.map((menu) => ({ key: menu.key, label: menu.label }))}
+          activeKey={location.menu.key}
+          onSelect={(key) => {
+            const menu = MENUS.find((m) => m.key === key)
+            if (menu) setFilter('indicator', menu.tabs[0].indicatorCode)
+          }}
+          open={mobileNavOpen}
+          onOpenChange={setMobileNavOpen}
+          breakpoint="lg"
+        />
+      </AppLayout.Sider>
 
       <AppLayout.Content>
         {canCapture && (
@@ -253,6 +282,7 @@ function App() {
         </div>
         </div>
       </AppLayout.Content>
+      </AppLayout>
     </AppLayout>
   )
 }

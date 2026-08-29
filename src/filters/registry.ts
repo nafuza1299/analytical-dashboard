@@ -34,7 +34,7 @@ export const countriesFilter: FilterDef<string[]> = {
 }
 
 export const MIN_YEAR = 1960
-const currentYear = () => new Date().getFullYear()
+export const currentYear = () => new Date().getFullYear()
 
 export const yearRangeFilter: FilterDef<[number, number]> = {
   id: 'yearRange',

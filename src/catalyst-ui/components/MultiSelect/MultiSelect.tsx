@@ -19,7 +19,7 @@ export interface MultiSelectProps {
   onChange: (next: string[]) => void
   /** Selection stops accepting new picks once reached. */
   max?: number
-  /** Last remaining picked item can't be removed below this. Defaults to 1. */
+  /** Picked items can't be removed below this floor. Defaults to 0 (down to none — see "Clear all"). */
   min?: number
 }
 
@@ -41,7 +41,7 @@ const classNames: ClassNamesConfig<MultiSelectOption, true> = {
   noOptionsMessage: () => 'px-3 py-2 text-sm text-text-muted',
 }
 
-export function MultiSelect({ label, options, value, onChange, max, min = 1 }: MultiSelectProps) {
+export function MultiSelect({ label, options, value, onChange, max, min = 0 }: MultiSelectProps) {
   const selected = options.filter((o) => value.includes(o.value))
 
   const toggle = (code: string) => {
@@ -84,9 +84,20 @@ export function MultiSelect({ label, options, value, onChange, max, min = 1 }: M
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-text">
-        {label} ({value.length})
-      </span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-medium text-text">
+          {label} ({value.length})
+        </span>
+        {value.length > min && (
+          <button
+            type="button"
+            onClick={() => onChange(value.slice(0, min))}
+            className="text-xs text-text-muted hover:text-text underline underline-offset-2"
+          >
+            Clear all
+          </button>
+        )}
+      </div>
       <Select<MultiSelectOption, true>
         inputId={`multiselect-${label}`}
         aria-label={label}

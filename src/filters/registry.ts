@@ -26,7 +26,9 @@ export const countriesFilter: FilterDef<string[]> = {
       .split(',')
       .map((c) => c.trim().toUpperCase())
       .filter(Boolean)
-    if (codes.length === 0 || codes.length > MAX_COUNTRIES) return null
+    // An empty list is valid — it's the explicit "cleared" state, distinct
+    // from an absent URL param (which falls back to cache/default instead).
+    if (codes.length > MAX_COUNTRIES) return null
     return codes.every((c) => COUNTRY_CODE.test(c)) ? codes : null
   },
 }

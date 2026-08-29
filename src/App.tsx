@@ -36,6 +36,10 @@ function App() {
   const { data, isLoading, error, status, refetch } = useQuery({
     queryKey: ['indicator', values.countries, values.indicator, values.yearRange],
     queryFn: () => fetchIndicatorData(values.countries, values.indicator, values.yearRange),
+    // The Countries filter can now be cleared down to none (see MultiSelect's
+    // "Clear all") — an empty country list would otherwise fire a malformed
+    // request to the World Bank API instead of just showing a prompt below.
+    enabled: values.countries.length > 0,
     // Default networkMode:'online' silently *pauses* the query (no data, no
     // error, no loading) whenever the browser fires an offline event — e.g. a
     // DNS failure — leaving the UI stuck rendering nothing forever. 'always'
@@ -138,7 +142,16 @@ function App() {
             falls back to starting at the top instead of clipping off-screen. */}
         <div className="flex-1 min-h-0 flex flex-col [justify-content:safe_center]">
         <div ref={pageContainerRef} className="w-full max-w-[1400px] mx-auto">
-        {isLoading && (
+        {values.countries.length === 0 && (
+          <Card className="w-full">
+            <Card.Body>
+              <p className="text-text font-medium mb-1">No countries selected</p>
+              <p className="text-sm text-text-muted">Pick at least one country from the Filters section above.</p>
+            </Card.Body>
+          </Card>
+        )}
+
+        {values.countries.length > 0 && isLoading && (
           <Row gutter={16} className="w-full">
             {[0, 1, 2, 3].map((i) => (
               <Col key={i} span={12} lg={6}>

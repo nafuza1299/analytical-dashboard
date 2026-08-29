@@ -4,7 +4,7 @@ export interface CountryOption {
   name: string
 }
 
-export const COUNTRY_OPTIONS: CountryOption[] = [
+const RAW_COUNTRY_OPTIONS: CountryOption[] = [
   { code: 'USA', name: 'United States' },
   { code: 'CHN', name: 'China' },
   { code: 'JPN', name: 'Japan' },
@@ -46,5 +46,7 @@ export const COUNTRY_OPTIONS: CountryOption[] = [
   { code: 'CHL', name: 'Chile' },
   { code: 'COL', name: 'Colombia' },
 ]
+
+export const COUNTRY_OPTIONS = [...RAW_COUNTRY_OPTIONS].sort((a, b) => a.name.localeCompare(b.name))
 
 export const COUNTRY_CODES = COUNTRY_OPTIONS.map((c) => c.code)

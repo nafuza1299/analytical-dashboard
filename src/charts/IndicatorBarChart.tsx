@@ -26,7 +26,7 @@ export function IndicatorBarChart({ rows, indicatorName }: Props) {
           tickFormatter={formatCompact}
           label={{ value: indicatorName, angle: -90, position: 'insideLeft' }}
         />
-        <Tooltip formatter={(value: number) => formatFull(value)} />
+        <Tooltip formatter={(value) => formatFull(Number(value))} />
         <Bar dataKey="value" fill="#2563eb" />
       </BarChart>
     </ResponsiveContainer>

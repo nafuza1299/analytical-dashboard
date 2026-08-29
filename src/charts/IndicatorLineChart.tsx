@@ -35,7 +35,7 @@ export function IndicatorLineChart({ rows, indicatorName }: Props) {
           tickFormatter={formatCompact}
           label={{ value: indicatorName, angle: -90, position: 'insideLeft' }}
         />
-        <Tooltip formatter={(value: number) => formatFull(value)} />
+        <Tooltip formatter={(value) => formatFull(Number(value))} />
         <Legend />
         {countries.map(([code, name], i) => (
           <Line

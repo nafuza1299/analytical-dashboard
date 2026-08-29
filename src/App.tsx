@@ -1,5 +1,15 @@
-import { useRef } from 'react'
-import { Layout } from './catalyst-ui/components/Layout/Layout'
+import { useRef, useState } from 'react'
+import {
+  DEFAULT_BREAKPOINTS,
+  DEFAULT_COLS,
+  ResponsiveGridLayout,
+  useContainerWidth,
+  type Layout,
+  type ResponsiveLayouts,
+} from 'react-grid-layout'
+import 'react-grid-layout/css/styles.css'
+import 'react-resizable/css/styles.css'
+import { Layout as AppLayout } from './catalyst-ui/components/Layout/Layout'
 import { MenuBar } from './catalyst-ui/components/MenuBar/MenuBar'
 import { Row } from './catalyst-ui/components/Grid/Row'
 import { Col } from './catalyst-ui/components/Grid/Col'
@@ -18,6 +28,7 @@ import { buildExportFilename } from './export/exportToExcel'
 import { CaptureButton } from './export/CaptureButton'
 import { formatFilterSummary } from './export/filterSummary'
 import { findTabByIndicator, MENUS } from './navigation/menus'
+import { DEFAULT_LAYOUT, readLayoutCache, writeLayoutCache } from './layout/gridLayout'
 
 function App() {
   const { values, setFilter } = useFilters(['countries', 'yearRange', 'indicator'] as const)
@@ -38,6 +49,17 @@ function App() {
   const tableRef = useRef<HTMLDivElement>(null)
   const pageRef = useRef<HTMLDivElement>(null)
 
+  const [editingLayout, setEditingLayout] = useState(false)
+  const [layouts, setLayouts] = useState<ResponsiveLayouts<string>>(
+    () => readLayoutCache() ?? { lg: DEFAULT_LAYOUT },
+  )
+  const { width: gridWidth, containerRef: gridContainerRef } = useContainerWidth()
+
+  const handleLayoutChange = (_layout: Layout, allLayouts: ResponsiveLayouts<string>) => {
+    setLayouts(allLayouts)
+    writeLayoutCache(allLayouts)
+  }
+
   const barRows = data ? latestYearRows(data) : []
   const pieRows =
     data && isAdditiveIndicator(values.indicator)
@@ -52,8 +74,8 @@ function App() {
   const canCapture = status === 'success' && !!data && data.length > 0
 
   return (
-    <Layout>
-      <Layout.Header>
+    <AppLayout>
+      <AppLayout.Header>
         <MenuBar>
           <MenuBar.Brand>Analytical Dashboard</MenuBar.Brand>
           <MenuBar.Nav>
@@ -68,9 +90,9 @@ function App() {
             ))}
           </MenuBar.Nav>
         </MenuBar>
-      </Layout.Header>
+      </AppLayout.Header>
 
-      <Layout.Content>
+      <AppLayout.Content>
         <div className="flex flex-wrap items-center gap-2 mb-3">
           {location.menu.tabs.map((tab) => (
             <Button
@@ -98,6 +120,15 @@ function App() {
               format="pdf"
               label="Capture everything (PDF)"
             />
+          )}
+          {canCapture && (
+            <Button
+              variant={editingLayout ? 'primary' : 'ghost'}
+              size="sm"
+              onClick={() => setEditingLayout((v) => !v)}
+            >
+              {editingLayout ? 'Done editing layout' : 'Edit layout'}
+            </Button>
           )}
         </div>
 
@@ -141,91 +172,111 @@ function App() {
         {!isLoading && !error && data && data.length > 0 && (
           <div ref={pageRef}>
             <p className="text-sm text-text-muted mb-3">{filterSummary}</p>
-            <Row gutter={16}>
-              <Col span={12} lg={6}>
-                <Card>
-                  <Card.Header className="flex items-center justify-between">
-                    <Card.Title>{indicatorName} over time</Card.Title>
-                    <div className="flex gap-2">
-                      <ExportButton rows={data} filename={filenameFor('line', 'xlsx')} />
-                      {canCapture && (
-                        <CaptureButton targetRef={lineRef} filename={filenameFor('line', 'png')} format="png" />
-                      )}
-                    </div>
-                  </Card.Header>
-                  <Card.Body>
-                    <div ref={lineRef}>
-                      <p className="text-xs text-text-muted mb-2">{filterSummary}</p>
-                      <IndicatorLineChart rows={data} indicatorName={indicatorName} />
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col span={12} lg={6}>
-                <Card>
-                  <Card.Header className="flex items-center justify-between">
-                    <Card.Title>{indicatorName} by country</Card.Title>
-                    <div className="flex gap-2">
-                      <ExportButton rows={barRows} filename={filenameFor('bar', 'xlsx')} />
-                      {canCapture && (
-                        <CaptureButton targetRef={barRef} filename={filenameFor('bar', 'png')} format="png" />
-                      )}
-                    </div>
-                  </Card.Header>
-                  <Card.Body>
-                    <div ref={barRef}>
-                      <p className="text-xs text-text-muted mb-2">{filterSummary}</p>
-                      <IndicatorBarChart rows={data} indicatorName={indicatorName} />
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col span={12} lg={6}>
-                <Card>
-                  <Card.Header className="flex items-center justify-between">
-                    <Card.Title>Share of total</Card.Title>
-                    <div className="flex gap-2">
-                      <ExportButton rows={pieRows} filename={filenameFor('pie', 'xlsx')} />
-                      {canCapture && pieRows.length > 0 && (
-                        <CaptureButton targetRef={pieRef} filename={filenameFor('pie', 'png')} format="png" />
-                      )}
-                    </div>
-                  </Card.Header>
-                  <Card.Body>
-                    <div ref={pieRef}>
-                      <p className="text-xs text-text-muted mb-2">{filterSummary}</p>
-                      <IndicatorPieChart rows={data} indicatorCode={values.indicator} />
-                      <p className="text-sm text-text-muted">
-                        Hidden automatically for non-additive indicators (rates, percentages).
-                      </p>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-              <Col span={12} lg={6}>
-                <Card>
-                  <Card.Header className="flex items-center justify-between">
-                    <Card.Title>Raw data</Card.Title>
-                    <div className="flex gap-2">
-                      <ExportButton rows={data} filename={filenameFor('table', 'xlsx')} />
-                      {canCapture && (
-                        <CaptureButton targetRef={tableRef} filename={filenameFor('table', 'png')} format="png" />
-                      )}
-                    </div>
-                  </Card.Header>
-                  <Card.Body>
-                    <div ref={tableRef}>
-                      <p className="text-xs text-text-muted mb-2">{filterSummary}</p>
-                      <DataTable rows={data} />
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            </Row>
+            <div ref={gridContainerRef}>
+              <ResponsiveGridLayout
+                width={gridWidth}
+                layouts={layouts}
+                breakpoints={DEFAULT_BREAKPOINTS}
+                cols={DEFAULT_COLS}
+                rowHeight={24}
+                margin={[16, 16]}
+                dragConfig={{ enabled: editingLayout, handle: '.drag-handle' }}
+                resizeConfig={{ enabled: editingLayout }}
+                onLayoutChange={handleLayoutChange}
+              >
+                <div key="line">
+                  <Card className="h-full flex flex-col">
+                    <Card.Header
+                      className={`flex items-center justify-between ${editingLayout ? 'drag-handle cursor-move' : ''}`}
+                    >
+                      <Card.Title>{indicatorName} over time</Card.Title>
+                      <div className="flex gap-2">
+                        <ExportButton rows={data} filename={filenameFor('line', 'xlsx')} />
+                        {canCapture && (
+                          <CaptureButton targetRef={lineRef} filename={filenameFor('line', 'png')} format="png" />
+                        )}
+                      </div>
+                    </Card.Header>
+                    <Card.Body className="flex-1 overflow-auto">
+                      <div ref={lineRef}>
+                        <p className="text-xs text-text-muted mb-2">{filterSummary}</p>
+                        <IndicatorLineChart rows={data} indicatorName={indicatorName} />
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </div>
+                <div key="bar">
+                  <Card className="h-full flex flex-col">
+                    <Card.Header
+                      className={`flex items-center justify-between ${editingLayout ? 'drag-handle cursor-move' : ''}`}
+                    >
+                      <Card.Title>{indicatorName} by country</Card.Title>
+                      <div className="flex gap-2">
+                        <ExportButton rows={barRows} filename={filenameFor('bar', 'xlsx')} />
+                        {canCapture && (
+                          <CaptureButton targetRef={barRef} filename={filenameFor('bar', 'png')} format="png" />
+                        )}
+                      </div>
+                    </Card.Header>
+                    <Card.Body className="flex-1 overflow-auto">
+                      <div ref={barRef}>
+                        <p className="text-xs text-text-muted mb-2">{filterSummary}</p>
+                        <IndicatorBarChart rows={data} indicatorName={indicatorName} />
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </div>
+                <div key="pie">
+                  <Card className="h-full flex flex-col">
+                    <Card.Header
+                      className={`flex items-center justify-between ${editingLayout ? 'drag-handle cursor-move' : ''}`}
+                    >
+                      <Card.Title>Share of total</Card.Title>
+                      <div className="flex gap-2">
+                        <ExportButton rows={pieRows} filename={filenameFor('pie', 'xlsx')} />
+                        {canCapture && pieRows.length > 0 && (
+                          <CaptureButton targetRef={pieRef} filename={filenameFor('pie', 'png')} format="png" />
+                        )}
+                      </div>
+                    </Card.Header>
+                    <Card.Body className="flex-1 overflow-auto">
+                      <div ref={pieRef}>
+                        <p className="text-xs text-text-muted mb-2">{filterSummary}</p>
+                        <IndicatorPieChart rows={data} indicatorCode={values.indicator} />
+                        <p className="text-sm text-text-muted">
+                          Hidden automatically for non-additive indicators (rates, percentages).
+                        </p>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </div>
+                <div key="table">
+                  <Card className="h-full flex flex-col">
+                    <Card.Header
+                      className={`flex items-center justify-between ${editingLayout ? 'drag-handle cursor-move' : ''}`}
+                    >
+                      <Card.Title>Raw data</Card.Title>
+                      <div className="flex gap-2">
+                        <ExportButton rows={data} filename={filenameFor('table', 'xlsx')} />
+                        {canCapture && (
+                          <CaptureButton targetRef={tableRef} filename={filenameFor('table', 'png')} format="png" />
+                        )}
+                      </div>
+                    </Card.Header>
+                    <Card.Body className="flex-1 overflow-auto">
+                      <div ref={tableRef}>
+                        <p className="text-xs text-text-muted mb-2">{filterSummary}</p>
+                        <DataTable rows={data} />
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </div>
+              </ResponsiveGridLayout>
+            </div>
           </div>
         )}
-      </Layout.Content>
-    </Layout>
+      </AppLayout.Content>
+    </AppLayout>
   )
 }
 

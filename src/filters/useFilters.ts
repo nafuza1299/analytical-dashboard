@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { CACHE_KEY, FILTERS, type FilterId, type FilterValues } from './registry'
+import { CACHE_KEY, FILTERS, type FilterDef, type FilterId, type FilterValues } from './registry'
 import { resolveFilterValue } from './resolveFilterValue'
 
 function readCache(): Partial<Record<FilterId, string>> | null {
@@ -47,12 +47,15 @@ export function useFilters<K extends FilterId>(
     const cached = readCache()
     const result = {} as { [P in K]: FilterValues[P] }
     for (const id of pageFilterIds) {
+      // TS can't distribute a generic call over a union key inside a loop —
+      // each iteration is sound at runtime since `id` narrows FILTERS[id]
+      // and defaultOverrides[id] to the same FilterValues[id] together.
       result[id] = resolveFilterValue(
-        FILTERS[id],
+        FILTERS[id] as unknown as FilterDef<FilterValues[K]>,
         urlParams,
         cached,
         pageFilterIds,
-        defaultOverrides?.[id],
+        defaultOverrides?.[id] as FilterValues[K] | undefined,
       ) as FilterValues[K]
     }
     return result

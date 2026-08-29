@@ -27,7 +27,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
             data={yearRows}
             dataKey="value"
             nameKey="countryName"
-            label={(entry) => entry.countryName}
+            label={(entry) => entry.name}
             // ponytail: recharts 3.10.1's Pie animation gets stuck and never
             // renders a sector in this React 19/StrictMode setup — disabling
             // it is the fix, not a stylistic choice. Revisit if recharts patches it.
@@ -37,7 +37,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
               <Cell key={r.countryCode} fill={CHART_COLORS[i % CHART_COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value: number) => formatFull(value)} />
+          <Tooltip formatter={(value) => formatFull(Number(value))} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>

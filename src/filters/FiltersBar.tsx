@@ -55,12 +55,15 @@ export function FiltersBar({ values, setFilter }: FiltersBarProps) {
           min={MIN_YEAR}
           max={currentYear()}
         />
-      </div>
 
-      <div className="flex justify-end mt-4 pt-3 border-t border-border">
-        <Button variant="primary" size="sm" onClick={applyFilters} disabled={!isDirty}>
-          Apply
-        </Button>
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-medium invisible" aria-hidden="true">
+            Apply
+          </span>
+          <Button variant="primary" size="md" onClick={applyFilters} disabled={!isDirty}>
+            Apply
+          </Button>
+        </div>
       </div>
     </Card>
   )

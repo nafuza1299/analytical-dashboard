@@ -30,7 +30,7 @@ export function IndicatorLineChart({ rows }: Props) {
   const countries = [...new Map(rows.map((r) => [r.countryCode, r.countryName]))]
 
   return (
-    <ResponsiveContainer width="100%" height={360}>
+    <ResponsiveContainer width="100%" height="100%" minHeight={200}>
       <LineChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="year" {...xAxisTickProps} />

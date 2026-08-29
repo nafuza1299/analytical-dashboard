@@ -12,7 +12,7 @@ export function IndicatorBarChart({ rows }: Props) {
   if (yearRows.length === 0) return null
 
   return (
-    <ResponsiveContainer width="100%" height={320}>
+    <ResponsiveContainer width="100%" height="100%" minHeight={200}>
       <BarChart data={yearRows} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="countryName" tick={axisTickStyle} />

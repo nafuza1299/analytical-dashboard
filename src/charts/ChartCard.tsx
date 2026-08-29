@@ -39,7 +39,9 @@ export function ChartCard({
         </div>
       </Card.Header>
       <Card.Body className="flex-1 overflow-auto">
-        <div ref={captureRef}>{children}</div>
+        <div ref={captureRef} className="h-full">
+          {children}
+        </div>
       </Card.Body>
     </Card>
   )

@@ -19,28 +19,30 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
   const year = yearRows[0].year
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <p className="text-sm text-text-muted mb-2">Share of total ({year})</p>
-      <ResponsiveContainer width="100%" height={320}>
-        <PieChart>
-          <Pie
-            data={yearRows}
-            dataKey="value"
-            nameKey="countryName"
-            label={(entry) => entry.name}
-            // ponytail: recharts 3.10.1's Pie animation gets stuck and never
-            // renders a sector in this React 19/StrictMode setup — disabling
-            // it is the fix, not a stylistic choice. Revisit if recharts patches it.
-            isAnimationActive={false}
-          >
-            {yearRows.map((r, i) => (
-              <Cell key={r.countryCode} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip formatter={(value) => formatFull(Number(value))} {...tooltipProps} />
-          <Legend {...legendProps} />
-        </PieChart>
-      </ResponsiveContainer>
+      <div className="min-h-0 flex-1">
+        <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+          <PieChart>
+            <Pie
+              data={yearRows}
+              dataKey="value"
+              nameKey="countryName"
+              label={(entry) => entry.name}
+              // ponytail: recharts 3.10.1's Pie animation gets stuck and never
+              // renders a sector in this React 19/StrictMode setup — disabling
+              // it is the fix, not a stylistic choice. Revisit if recharts patches it.
+              isAnimationActive={false}
+            >
+              {yearRows.map((r, i) => (
+                <Cell key={r.countryCode} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip formatter={(value) => formatFull(Number(value))} {...tooltipProps} />
+            <Legend {...legendProps} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }

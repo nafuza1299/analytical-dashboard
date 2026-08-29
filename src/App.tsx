@@ -82,6 +82,27 @@ function App() {
       </AppLayout.Header>
 
       <AppLayout.Content>
+        {canCapture && (
+          <div className="flex flex-wrap items-center justify-end gap-2 mb-3">
+            <CaptureButton
+              targetRef={pageRef}
+              filename={filenameFor('dashboard', 'pdf')}
+              format="pdf"
+              label="Capture everything (PDF)"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                clearLayoutCache(values.indicator)
+                setLayoutResetNonce((n) => n + 1)
+              }}
+            >
+              Clear layout
+            </Button>
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-2 mb-3">
           {location.menu.tabs.map((tab) => (
             <Button
@@ -102,27 +123,6 @@ function App() {
           <Button variant="ghost" size="sm" onClick={() => setFilter('countries', ['USA', 'CHN', 'JPN'])}>
             USA, CHN, JPN
           </Button>
-          {canCapture && (
-            <CaptureButton
-              targetRef={pageRef}
-              filename={filenameFor('dashboard', 'pdf')}
-              format="pdf"
-              label="Capture everything (PDF)"
-            />
-          )}
-          {canCapture && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto"
-              onClick={() => {
-                clearLayoutCache(values.indicator)
-                setLayoutResetNonce((n) => n + 1)
-              }}
-            >
-              Clear layout
-            </Button>
-          )}
         </div>
 
         {/* Vertically centers the chart block in whatever space is left below

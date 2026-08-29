@@ -29,13 +29,14 @@ const classNames: ClassNamesConfig<MultiSelectOption, true> = {
       'rounded-md border bg-surface px-1 min-h-10 transition-colors duration-150',
       state.isFocused ? 'border-primary ring-2 ring-primary' : 'border-border hover:border-text-muted',
     ].join(' '),
-  valueContainer: () => 'gap-1 py-1',
+  valueContainer: () => 'gap-1 py-1 max-h-20 overflow-y-auto',
   placeholder: () => 'text-text-muted text-sm',
   input: () => 'text-text text-sm',
   indicatorSeparator: () => 'bg-border',
   dropdownIndicator: () => 'text-text-muted',
   clearIndicator: () => 'text-text-muted',
-  menu: () => 'mt-1 rounded-lg border border-border bg-surface shadow-elevation overflow-hidden z-50',
+  menuPortal: () => 'z-50',
+  menu: () => 'mt-1 rounded-lg border border-border bg-surface shadow-elevation overflow-hidden',
   menuList: () => 'max-h-72 overflow-y-auto py-1',
   noOptionsMessage: () => 'px-3 py-2 text-sm text-text-muted',
 }
@@ -82,7 +83,7 @@ export function MultiSelect({ label, options, value, onChange, max, min = 1 }: M
   )
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1">
       <span className="text-sm font-medium text-text">
         {label} ({value.length})
       </span>
@@ -102,6 +103,7 @@ export function MultiSelect({ label, options, value, onChange, max, min = 1 }: M
         }
         components={{ Option, MultiValue }}
         classNames={classNames}
+        menuPortalTarget={document.body}
         className="w-64"
       />
     </div>

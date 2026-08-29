@@ -19,11 +19,8 @@ export function FiltersBar({ values, setFilter }: FiltersBarProps) {
   const [from, to] = values.yearRange
 
   return (
-    <Card className="mb-4">
-      <Card.Header>
-        <Card.Title>Filters</Card.Title>
-      </Card.Header>
-      <Card.Body className="flex flex-wrap items-start gap-6">
+    <Card padding="sm" className="mb-4">
+      <div className="flex flex-wrap items-start gap-4">
         <MultiSelect
           label="Countries"
           options={COUNTRY_OPTIONS.map((c) => ({ value: c.code, label: c.name }))}
@@ -32,7 +29,7 @@ export function FiltersBar({ values, setFilter }: FiltersBarProps) {
           max={MAX_COUNTRIES}
         />
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1">
           <span className="text-sm font-medium text-text">Year range</span>
           <div className="flex items-center gap-2">
             <select
@@ -62,7 +59,7 @@ export function FiltersBar({ values, setFilter }: FiltersBarProps) {
             </select>
           </div>
         </div>
-      </Card.Body>
+      </div>
     </Card>
   )
 }

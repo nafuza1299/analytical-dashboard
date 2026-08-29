@@ -70,11 +70,17 @@ function App() {
   const [layoutResetNonce, setLayoutResetNonce] = useState(0)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
-  // One toggle drives both: only one of Sider-collapse (desktop) or the
-  // drawer (mobile) is ever visible at a time, so flipping both is harmless.
+  // Toggling the one not in play isn't actually harmless: SideNav's drawer
+  // effect locks document.body scroll whenever `open` is true, even while
+  // the drawer itself is invisible (lg:hidden) — so flipping mobileNavOpen
+  // on desktop silently froze page scroll. Only touch the state that
+  // matches the current viewport (1024px = the shared "lg" breakpoint).
   const toggleSidebar = () => {
-    setSidebarCollapsed((c) => !c)
-    setMobileNavOpen((o) => !o)
+    if (window.innerWidth < 1024) {
+      setMobileNavOpen((o) => !o)
+    } else {
+      setSidebarCollapsed((c) => !c)
+    }
   }
 
   const barRows = data ? latestYearRows(data) : []

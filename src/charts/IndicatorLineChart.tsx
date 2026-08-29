@@ -10,7 +10,7 @@ import {
 } from 'recharts'
 import type { DataRow } from '../api/worldBank'
 import { pivotByYear } from './pivotByYear'
-import { CHART_COLORS, formatCompact, formatFull, xAxisTickProps } from './chartTheme'
+import { CHART_COLORS, formatCompact, formatFull, legendProps, xAxisTickProps } from './chartTheme'
 
 interface Props {
   rows: DataRow[]
@@ -36,7 +36,7 @@ export function IndicatorLineChart({ rows, indicatorName }: Props) {
           label={{ value: indicatorName, angle: -90, position: 'insideLeft' }}
         />
         <Tooltip formatter={(value) => formatFull(Number(value))} />
-        <Legend />
+        <Legend {...legendProps} />
         {countries.map(([code, name], i) => (
           <Line
             key={code}

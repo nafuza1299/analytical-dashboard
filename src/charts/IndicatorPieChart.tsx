@@ -2,7 +2,7 @@ import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recha
 import type { DataRow } from '../api/worldBank'
 import { latestYearRows } from './latestYearRows'
 import { isAdditiveIndicator } from './additiveIndicators'
-import { CHART_COLORS, formatFull } from './chartTheme'
+import { CHART_COLORS, formatFull, legendProps } from './chartTheme'
 
 interface Props {
   rows: DataRow[]
@@ -38,7 +38,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
             ))}
           </Pie>
           <Tooltip formatter={(value) => formatFull(Number(value))} />
-          <Legend />
+          <Legend {...legendProps} />
         </PieChart>
       </ResponsiveContainer>
     </div>

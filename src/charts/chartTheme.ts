@@ -19,3 +19,13 @@ export function formatFull(value: number): string {
 
 // Skips overlapping ticks instead of rotating/truncating labels.
 export const xAxisTickProps = { interval: 'preserveStartEnd' as const }
+
+// Right-side, smaller-font legend shared by every chart that has one.
+// maxHeight + overflowY caps it so a long country list scrolls instead of
+// overflowing the chart (recharts has no built-in legend pagination).
+export const legendProps = {
+  layout: 'vertical' as const,
+  verticalAlign: 'middle' as const,
+  align: 'right' as const,
+  wrapperStyle: { fontSize: 12, maxHeight: 280, overflowY: 'auto' as const },
+}

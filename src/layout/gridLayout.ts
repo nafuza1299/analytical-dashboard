@@ -12,18 +12,28 @@ export const DEFAULT_LAYOUT: Layout = [
   { i: 'table', x: 6, y: 16, w: 6, h: 16 },
 ]
 
-export function readLayoutCache(): ResponsiveLayouts<string> | null {
+// Keyed by page (the active indicator code) so rearranging the GDP page's
+// charts doesn't touch the Life Expectancy page's arrangement.
+type LayoutCache = Record<string, ResponsiveLayouts<string>>
+
+function readAllLayouts(): LayoutCache {
   try {
     const raw = localStorage.getItem(CACHE_KEY)
-    return raw ? JSON.parse(raw) : null
+    return raw ? JSON.parse(raw) : {}
   } catch {
-    return null
+    return {}
   }
 }
 
-export function writeLayoutCache(layouts: ResponsiveLayouts<string>) {
+export function readLayoutCache(pageKey: string): ResponsiveLayouts<string> | null {
+  return readAllLayouts()[pageKey] ?? null
+}
+
+export function writeLayoutCache(pageKey: string, layouts: ResponsiveLayouts<string>) {
   try {
-    localStorage.setItem(CACHE_KEY, JSON.stringify(layouts))
+    const all = readAllLayouts()
+    all[pageKey] = layouts
+    localStorage.setItem(CACHE_KEY, JSON.stringify(all))
   } catch {
     // storage disabled/full — layout just won't persist across sessions
   }

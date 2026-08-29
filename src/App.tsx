@@ -1,12 +1,5 @@
 import { useRef, useState } from 'react'
-import {
-  DEFAULT_BREAKPOINTS,
-  DEFAULT_COLS,
-  ResponsiveGridLayout,
-  useContainerWidth,
-  type Layout,
-  type ResponsiveLayouts,
-} from 'react-grid-layout'
+import { useContainerWidth } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import { Layout as AppLayout } from './catalyst-ui/components/Layout/Layout'
@@ -28,7 +21,7 @@ import { buildExportFilename } from './export/exportToExcel'
 import { CaptureButton } from './export/CaptureButton'
 import { formatFilterSummary } from './export/filterSummary'
 import { findTabByIndicator, MENUS } from './navigation/menus'
-import { DEFAULT_LAYOUT, readLayoutCache, writeLayoutCache } from './layout/gridLayout'
+import { PageChartGrid } from './layout/PageChartGrid'
 
 function App() {
   const { values, setFilter } = useFilters(['countries', 'yearRange', 'indicator'] as const)
@@ -50,15 +43,7 @@ function App() {
   const pageRef = useRef<HTMLDivElement>(null)
 
   const [editingLayout, setEditingLayout] = useState(false)
-  const [layouts, setLayouts] = useState<ResponsiveLayouts<string>>(
-    () => readLayoutCache() ?? { lg: DEFAULT_LAYOUT },
-  )
   const { width: gridWidth, containerRef: gridContainerRef } = useContainerWidth()
-
-  const handleLayoutChange = (_layout: Layout, allLayouts: ResponsiveLayouts<string>) => {
-    setLayouts(allLayouts)
-    writeLayoutCache(allLayouts)
-  }
 
   const barRows = data ? latestYearRows(data) : []
   const pieRows =
@@ -173,17 +158,7 @@ function App() {
           <div ref={pageRef}>
             <p className="text-sm text-text-muted mb-3">{filterSummary}</p>
             <div ref={gridContainerRef}>
-              <ResponsiveGridLayout
-                width={gridWidth}
-                layouts={layouts}
-                breakpoints={DEFAULT_BREAKPOINTS}
-                cols={DEFAULT_COLS}
-                rowHeight={24}
-                margin={[16, 16]}
-                dragConfig={{ enabled: editingLayout, handle: '.drag-handle' }}
-                resizeConfig={{ enabled: editingLayout }}
-                onLayoutChange={handleLayoutChange}
-              >
+              <PageChartGrid key={values.indicator} pageKey={values.indicator} editing={editingLayout} width={gridWidth}>
                 <div key="line">
                   <Card className="h-full flex flex-col">
                     <Card.Header
@@ -271,7 +246,7 @@ function App() {
                     </Card.Body>
                   </Card>
                 </div>
-              </ResponsiveGridLayout>
+              </PageChartGrid>
             </div>
           </div>
         )}

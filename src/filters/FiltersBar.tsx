@@ -22,6 +22,9 @@ export function FiltersBar({ values, setFilter }: FiltersBarProps) {
   // in-progress edits every time the user navigates elsewhere.
   const [draft, setDraft] = useState<AppliedValues>(values)
   const appliedRef = useRef(values)
+  // Purely a display toggle — draft edits keep working while collapsed, so
+  // nothing is lost by hiding the controls.
+  const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
     if (JSON.stringify(values) !== JSON.stringify(appliedRef.current)) {
@@ -39,32 +42,57 @@ export function FiltersBar({ values, setFilter }: FiltersBarProps) {
 
   return (
     <Card padding="sm" className="rounded-none">
-      <div className="flex flex-wrap items-start gap-4">
-        <MultiSelect
-          label="Countries"
-          options={COUNTRY_OPTIONS.map((c) => ({ value: c.code, label: c.name }))}
-          value={draft.countries}
-          onChange={(next) => setDraft((d) => ({ ...d, countries: next }))}
-          max={MAX_COUNTRIES}
-        />
-
-        <YearRangePicker
-          label="Year range"
-          value={draft.yearRange}
-          onChange={(yearRange) => setDraft((d) => ({ ...d, yearRange }))}
-          min={MIN_YEAR}
-          max={currentYear()}
-        />
-
-        <div className="flex flex-col gap-1">
-          <span className="text-sm font-medium invisible" aria-hidden="true">
-            Apply
+      <div className="flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          aria-expanded={!collapsed}
+          className="flex items-center gap-1.5 text-sm font-medium text-text hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
+        >
+          <span
+            aria-hidden="true"
+            className={`text-xs transition-transform duration-150 ${collapsed ? '-rotate-90' : ''}`}
+          >
+            ▾
           </span>
-          <Button variant="primary" size="md" onClick={applyFilters} disabled={!isDirty}>
-            Apply
-          </Button>
-        </div>
+          Filters
+          {isDirty && <span aria-label="Unapplied changes" className="h-1.5 w-1.5 rounded-full bg-primary" />}
+        </button>
+        {collapsed && (
+          <span className="text-xs text-text-muted truncate">
+            {values.countries.length} countries · {values.yearRange[0]}–{values.yearRange[1]}
+          </span>
+        )}
       </div>
+
+      {!collapsed && (
+        <div className="flex flex-wrap items-start gap-4 mt-3">
+          <MultiSelect
+            label="Countries"
+            options={COUNTRY_OPTIONS.map((c) => ({ value: c.code, label: c.name }))}
+            value={draft.countries}
+            onChange={(next) => setDraft((d) => ({ ...d, countries: next }))}
+            max={MAX_COUNTRIES}
+          />
+
+          <YearRangePicker
+            label="Year range"
+            value={draft.yearRange}
+            onChange={(yearRange) => setDraft((d) => ({ ...d, yearRange }))}
+            min={MIN_YEAR}
+            max={currentYear()}
+          />
+
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-medium invisible" aria-hidden="true">
+              Apply
+            </span>
+            <Button variant="primary" size="md" onClick={applyFilters} disabled={!isDirty}>
+              Apply
+            </Button>
+          </div>
+        </div>
+      )}
     </Card>
   )
 }

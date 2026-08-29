@@ -10,7 +10,16 @@ import {
 } from 'recharts'
 import type { DataRow } from '../api/worldBank'
 import { pivotByYear } from './pivotByYear'
-import { CHART_COLORS, axisTickStyle, formatCompact, formatFull, legendProps, xAxisTickProps } from './chartTheme'
+import {
+  CHART_COLORS,
+  axisTickStyle,
+  cursorLine,
+  formatCompact,
+  formatFull,
+  legendProps,
+  tooltipProps,
+  xAxisTickProps,
+} from './chartTheme'
 
 interface Props {
   rows: DataRow[]
@@ -26,7 +35,7 @@ export function IndicatorLineChart({ rows }: Props) {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="year" {...xAxisTickProps} />
         <YAxis width={70} tickFormatter={formatCompact} tick={axisTickStyle} />
-        <Tooltip formatter={(value) => formatFull(Number(value))} />
+        <Tooltip formatter={(value) => formatFull(Number(value))} cursor={cursorLine} {...tooltipProps} />
         <Legend {...legendProps} />
         {countries.map(([code, name], i) => (
           <Line

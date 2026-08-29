@@ -1,7 +1,7 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { DataRow } from '../api/worldBank'
 import { latestYearRows } from './latestYearRows'
-import { axisTickStyle, formatCompact, formatFull } from './chartTheme'
+import { axisTickStyle, cursorFill, formatCompact, formatFull, tooltipProps } from './chartTheme'
 
 interface Props {
   rows: DataRow[]
@@ -17,7 +17,7 @@ export function IndicatorBarChart({ rows }: Props) {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="countryName" tick={axisTickStyle} />
         <YAxis width={70} tickFormatter={formatCompact} tick={axisTickStyle} />
-        <Tooltip formatter={(value) => formatFull(Number(value))} />
+        <Tooltip formatter={(value) => formatFull(Number(value))} cursor={cursorFill} {...tooltipProps} />
         <Bar dataKey="value" fill="#2563eb" />
       </BarChart>
     </ResponsiveContainer>

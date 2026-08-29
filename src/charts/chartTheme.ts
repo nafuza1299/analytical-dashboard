@@ -30,5 +30,31 @@ export const legendProps = {
   layout: 'vertical' as const,
   verticalAlign: 'middle' as const,
   align: 'right' as const,
-  wrapperStyle: { fontSize: 12, maxHeight: 280, overflowY: 'auto' as const },
+  wrapperStyle: {
+    fontFamily: 'var(--font-sans)',
+    fontSize: 12,
+    maxHeight: 280,
+    overflowY: 'auto' as const,
+  },
 }
+
+// Tooltip box themed off the same CSS variables as the rest of the app, so it
+// reads as app chrome instead of recharts' default stark-white popup — which
+// was blinding on the dark theme.
+export const tooltipProps = {
+  contentStyle: {
+    backgroundColor: 'var(--color-surface)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 8,
+    fontFamily: 'var(--font-sans)',
+    fontSize: 14,
+  },
+  labelStyle: { color: 'var(--color-text)', fontWeight: 600 },
+  itemStyle: { color: 'var(--color-text)' },
+}
+
+// Tooltip's hover-highlight cursor (the rectangle behind a bar / vertical
+// line on a line chart) — reuses the app's own hover token instead of
+// recharts' default light grey, which washed out on dark backgrounds.
+export const cursorFill = { fill: 'var(--color-surface-hover)' }
+export const cursorLine = { stroke: 'var(--color-border)' }

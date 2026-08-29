@@ -108,6 +108,28 @@ function App() {
         </MenuBar>
       </AppLayout.Header>
 
+      <AppLayout hasSider>
+      <AppLayout.Sider
+        width={240}
+        collapsible
+        collapsed={sidebarCollapsed}
+        onCollapse={setSidebarCollapsed}
+        breakpoint="lg"
+      >
+        <SideNav
+          items={MENUS.map((menu) => ({ key: menu.key, label: menu.label }))}
+          activeKey={location.menu.key}
+          onSelect={(key) => {
+            const menu = MENUS.find((m) => m.key === key)
+            if (menu) setFilter('indicator', menu.tabs[0].indicatorCode)
+          }}
+          open={mobileNavOpen}
+          onOpenChange={setMobileNavOpen}
+          breakpoint="lg"
+        />
+      </AppLayout.Sider>
+
+      <div className="flex flex-1 min-w-0 flex-col">
       <div className="flex items-end gap-1 overflow-x-auto border-b border-border bg-surface px-3 pt-2">
         {location.menu.tabs.map((tab) => {
           const active = tab.key === location.tab.key
@@ -129,27 +151,6 @@ function App() {
           )
         })}
       </div>
-
-      <AppLayout hasSider>
-      <AppLayout.Sider
-        width={240}
-        collapsible
-        collapsed={sidebarCollapsed}
-        onCollapse={setSidebarCollapsed}
-        breakpoint="lg"
-      >
-        <SideNav
-          items={MENUS.map((menu) => ({ key: menu.key, label: menu.label }))}
-          activeKey={location.menu.key}
-          onSelect={(key) => {
-            const menu = MENUS.find((m) => m.key === key)
-            if (menu) setFilter('indicator', menu.tabs[0].indicatorCode)
-          }}
-          open={mobileNavOpen}
-          onOpenChange={setMobileNavOpen}
-          breakpoint="lg"
-        />
-      </AppLayout.Sider>
 
       <AppLayout.Content>
         {canCapture && (
@@ -291,6 +292,7 @@ function App() {
         </div>
         </div>
       </AppLayout.Content>
+      </div>
       </AppLayout>
     </AppLayout>
   )

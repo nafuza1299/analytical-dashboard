@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Button } from '../Button/Button'
 
 export interface YearRangePickerProps {
@@ -21,8 +22,27 @@ export function YearRangePicker({ label, value, onChange, min, max }: YearRangeP
   const [isOpen, setIsOpen] = useState(false)
   const [pendingStart, setPendingStart] = useState<number | null>(null)
   const [hoverYear, setHoverYear] = useState<number | null>(null)
+  const [panelPos, setPanelPos] = useState({ top: 0, left: 0 })
   const triggerRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+
+  // Portalled to <body> (see below) so the popover isn't clipped by an
+  // ancestor's overflow-hidden (e.g. the Filters Card) — position is tracked
+  // in viewport coordinates instead of relying on CSS anchoring.
+  useLayoutEffect(() => {
+    if (!isOpen) return
+    const updatePosition = () => {
+      const rect = triggerRef.current?.getBoundingClientRect()
+      if (rect) setPanelPos({ top: rect.bottom + 4, left: rect.left })
+    }
+    updatePosition()
+    window.addEventListener('scroll', updatePosition, true)
+    window.addEventListener('resize', updatePosition)
+    return () => {
+      window.removeEventListener('scroll', updatePosition, true)
+      window.removeEventListener('resize', updatePosition)
+    }
+  }, [isOpen])
 
   const years = useMemo(() => Array.from({ length: max - min + 1 }, (_, i) => min + i), [min, max])
 
@@ -97,41 +117,44 @@ export function YearRangePicker({ label, value, onChange, min, max }: YearRangeP
           </span>
         </Button>
 
-        {isOpen && (
-          <div
-            ref={panelRef}
-            role="dialog"
-            aria-label={`${label} year picker`}
-            className="absolute top-full left-0 mt-1 w-72 p-2 bg-surface border border-border rounded-lg shadow-elevation z-50"
-          >
+        {isOpen &&
+          createPortal(
             <div
-              className="grid grid-cols-6 gap-1 max-h-80 overflow-y-auto"
-              onMouseLeave={() => setHoverYear(null)}
+              ref={panelRef}
+              role="dialog"
+              aria-label={`${label} year picker`}
+              style={{ top: panelPos.top, left: panelPos.left }}
+              className="fixed w-72 p-2 bg-surface border border-border rounded-lg shadow-elevation z-50"
             >
-              {years.map((year) => {
-                const state = cellState(year)
-                return (
-                  <button
-                    key={year}
-                    type="button"
-                    aria-pressed={state === 'endpoint'}
-                    onMouseEnter={() => setHoverYear(year)}
-                    onClick={() => handleYearClick(year)}
-                    className={[
-                      'h-9 rounded-md text-sm transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
-                      cellClass[state],
-                      year === thisYear && state === 'default'
-                        ? 'underline decoration-dotted decoration-text-muted underline-offset-4'
-                        : '',
-                    ].join(' ')}
-                  >
-                    {year}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-        )}
+              <div
+                className="grid grid-cols-6 gap-1 max-h-80 overflow-y-auto"
+                onMouseLeave={() => setHoverYear(null)}
+              >
+                {years.map((year) => {
+                  const state = cellState(year)
+                  return (
+                    <button
+                      key={year}
+                      type="button"
+                      aria-pressed={state === 'endpoint'}
+                      onMouseEnter={() => setHoverYear(year)}
+                      onClick={() => handleYearClick(year)}
+                      className={[
+                        'h-9 rounded-md text-sm transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                        cellClass[state],
+                        year === thisYear && state === 'default'
+                          ? 'underline decoration-dotted decoration-text-muted underline-offset-4'
+                          : '',
+                      ].join(' ')}
+                    >
+                      {year}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>,
+            document.body,
+          )}
       </div>
     </div>
   )

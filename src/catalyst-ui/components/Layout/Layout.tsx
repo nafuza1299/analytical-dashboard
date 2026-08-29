@@ -166,6 +166,7 @@ const LayoutContent = forwardRef<HTMLDivElement, LayoutContentProps>(
         ref={ref}
         className={[
           "flex-1 min-w-0 overflow-y-auto",
+          "flex flex-col",
           "px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8",
           "bg-bg",
           className,

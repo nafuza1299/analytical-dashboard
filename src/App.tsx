@@ -125,8 +125,12 @@ function App() {
           )}
         </div>
 
+        {/* Vertically centers the chart block in whatever space is left below
+            the toolbar — "safe" so tall content (many charts, a long table)
+            falls back to starting at the top instead of clipping off-screen. */}
+        <div className="flex-1 min-h-0 flex flex-col [justify-content:safe_center]">
         {isLoading && (
-          <Row gutter={16}>
+          <Row gutter={16} className="w-full">
             {[0, 1, 2, 3].map((i) => (
               <Col key={i} span={12} lg={6}>
                 <Card loading />
@@ -136,7 +140,7 @@ function App() {
         )}
 
         {!isLoading && error && (
-          <Card>
+          <Card className="w-full">
             <Card.Body>
               <p className="text-danger font-medium mb-1">
                 Couldn't load {location.tab.label.toLowerCase()} data
@@ -150,7 +154,7 @@ function App() {
         )}
 
         {!isLoading && !error && data && data.length === 0 && (
-          <Card>
+          <Card className="w-full">
             <Card.Body>
               <p className="text-text font-medium mb-1">No data for this selection</p>
               <p className="text-sm text-text-muted">
@@ -163,7 +167,7 @@ function App() {
         )}
 
         {!isLoading && !error && data && data.length > 0 && (
-          <div ref={pageRef} className="max-w-[1400px] mx-auto">
+          <div ref={pageRef} className="w-full max-w-[1400px] mx-auto">
             <p className="text-sm text-text-muted mb-3">{filterSummary}</p>
             <div ref={gridContainerRef}>
               <PageChartGrid
@@ -262,6 +266,7 @@ function App() {
             </div>
           </div>
         )}
+        </div>
       </AppLayout.Content>
     </AppLayout>
   )

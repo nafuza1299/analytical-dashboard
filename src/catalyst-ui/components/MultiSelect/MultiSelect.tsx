@@ -106,7 +106,7 @@ export function MultiSelect({ label, options, value, onChange, max, min = 0 }: M
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => onChange(value.slice(0, min))}
-              className="flex-1 text-left px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text hover:bg-surface-hover border-l border-border"
+              className="flex-1 text-left px-3 py-1.5 text-xs font-medium text-danger hover:bg-danger/10 border-l border-border"
             >
               Clear all
             </button>

@@ -108,6 +108,28 @@ function App() {
         </MenuBar>
       </AppLayout.Header>
 
+      <div className="flex items-end gap-1 overflow-x-auto border-b border-border bg-surface px-3 pt-2">
+        {location.menu.tabs.map((tab) => {
+          const active = tab.key === location.tab.key
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              aria-current={active ? 'page' : undefined}
+              onClick={() => setFilter('indicator', tab.indicatorCode)}
+              className={[
+                'shrink-0 whitespace-nowrap rounded-t-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                active
+                  ? 'relative -mb-px border border-b-0 border-border bg-bg text-text'
+                  : 'text-text-muted hover:bg-surface-hover hover:text-text',
+              ].join(' ')}
+            >
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
+
       <AppLayout hasSider>
       <AppLayout.Sider
         width={240}
@@ -150,19 +172,6 @@ function App() {
             </Button>
           </div>
         )}
-
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          {location.menu.tabs.map((tab) => (
-            <Button
-              key={tab.key}
-              variant={tab.key === location.tab.key ? 'primary' : 'secondary'}
-              size="sm"
-              onClick={() => setFilter('indicator', tab.indicatorCode)}
-            >
-              {tab.label}
-            </Button>
-          ))}
-        </div>
 
         <FiltersBar values={values} setFilter={setFilter} />
 

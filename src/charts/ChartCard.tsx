@@ -30,8 +30,8 @@ export function ChartCard({
     <Card className="h-full flex flex-col">
       <Card.Header className="flex items-center justify-between drag-handle cursor-grab active:cursor-grabbing">
         <hgroup>
-          <p className="text-xs text-text-muted">{periodLabel}</p>
           <Card.Title>{title}</Card.Title>
+          <p className="text-xs text-text-muted">{periodLabel}</p>
         </hgroup>
         <div className="flex gap-2">
           <ExportButton rows={exportRows} filename={exportFilename} />

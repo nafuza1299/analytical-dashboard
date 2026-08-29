@@ -17,8 +17,8 @@ export function formatFull(value: number): string {
   return fullFormatter.format(value)
 }
 
-// Matches Card.Title's "text-base font-semibold" so axis numbers read like the chart title.
-export const axisTickStyle = { fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 600 }
+// Matches Card.Title's font so axis numbers read like the chart title.
+export const axisTickStyle = { fontFamily: 'var(--font-sans)', fontSize: 16 }
 
 // Skips overlapping ticks instead of rotating/truncating labels.
 export const xAxisTickProps = { interval: 'preserveStartEnd' as const, tick: axisTickStyle }
@@ -49,7 +49,7 @@ export const tooltipProps = {
     fontFamily: 'var(--font-sans)',
     fontSize: 14,
   },
-  labelStyle: { color: 'var(--color-text)', fontWeight: 600 },
+  labelStyle: { color: 'var(--color-text)' },
   itemStyle: { color: 'var(--color-text)' },
 }
 

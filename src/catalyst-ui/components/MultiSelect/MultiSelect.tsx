@@ -84,18 +84,34 @@ export function MultiSelect({ label, options, value, onChange, max, min = 0 }: M
     </span>
   )
 
+  const selectableCount = max !== undefined ? Math.min(max, options.length) : options.length
+
   const Menu = (props: MenuProps<MultiSelectOption, true>) => (
     <RSComponents.Menu {...props}>
       {props.children}
-      {value.length > min && (
-        <button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => onChange(value.slice(0, min))}
-          className="w-full text-left px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text hover:bg-surface-hover border-t border-border"
-        >
-          Clear all
-        </button>
+      {(value.length > min || value.length < selectableCount) && (
+        <div className="flex border-t border-border">
+          {value.length < selectableCount && (
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onChange(options.slice(0, selectableCount).map((o) => o.value))}
+              className="flex-1 text-left px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text hover:bg-surface-hover"
+            >
+              Select all
+            </button>
+          )}
+          {value.length > min && (
+            <button
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => onChange(value.slice(0, min))}
+              className="flex-1 text-left px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text hover:bg-surface-hover border-l border-border"
+            >
+              Clear all
+            </button>
+          )}
+        </div>
       )}
     </RSComponents.Menu>
   )

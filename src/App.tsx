@@ -23,7 +23,9 @@ import { latestYearRows } from './charts/latestYearRows'
 import { isAdditiveIndicator } from './charts/additiveIndicators'
 import { buildExportFilename } from './export/exportToExcel'
 import { CaptureButton } from './export/CaptureButton'
+import { ShareButton } from './export/ShareButton'
 import { findTabByIndicator, MENUS } from './navigation/menus'
+import { MENU_ICONS } from './navigation/menuIcons'
 import { PageChartGrid } from './layout/PageChartGrid'
 import { clearLayoutCache } from './layout/gridLayout'
 
@@ -98,7 +100,7 @@ function App() {
   return (
     <AppLayout>
       <AppLayout.Header>
-        <MenuBar>
+        <MenuBar className="[&>div]:py-2 [&>div]:md:py-2">
           <MenuBar.Brand>
             <button
               type="button"
@@ -125,7 +127,7 @@ function App() {
         breakpoint="lg"
       >
         <SideNav
-          items={MENUS.map((menu) => ({ key: menu.key, label: menu.label }))}
+          items={MENUS.map((menu) => ({ key: menu.key, label: menu.label, icon: MENU_ICONS[menu.key] }))}
           activeKey={location.menu.key}
           onSelect={(key) => {
             const menu = MENUS.find((m) => m.key === key)
@@ -171,8 +173,9 @@ function App() {
               targetRef={pageRef}
               filename={filenameFor('dashboard', 'pdf')}
               format="pdf"
-              label="Capture everything (PDF)"
+              label="Export as PDF"
             />
+            <ShareButton values={values} />
             <Button
               variant="ghost"
               size="sm"
@@ -181,6 +184,10 @@ function App() {
                 setLayoutResetNonce((n) => n + 1)
               }}
             >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 shrink-0" aria-hidden="true">
+                <path d="M3 12a9 9 0 1 1 2.64 6.36" />
+                <path d="M3 21v-6h6" />
+              </svg>
               Clear layout
             </Button>
           </div>

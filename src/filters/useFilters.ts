@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CACHE_KEY, FILTERS, type FilterDef, type FilterId, type FilterValues } from './registry'
 import { resolveFilterValue } from './resolveFilterValue'
+import { decodeShareToken, readShareToken } from './shareLink'
 
 function readCache(): Partial<Record<FilterId, string>> | null {
   try {
@@ -21,29 +22,35 @@ function writeCache(id: FilterId, serialized: string) {
   }
 }
 
-function useUrlSearch() {
-  const [search, setSearch] = useState(() => window.location.search)
-  useEffect(() => {
-    const onPopState = () => setSearch(window.location.search)
-    window.addEventListener('popstate', onPopState)
-    return () => window.removeEventListener('popstate', onPopState)
-  }, [])
-  return [search, setSearch] as const
+// One-time on load: a shared link's #s=<token> seeds the cache with its
+// filter values, then the hash is stripped so it doesn't linger in the URL.
+function applyShareTokenOnce() {
+  const token = readShareToken()
+  if (!token) return
+  const decoded = decodeShareToken(token)
+  if (decoded) {
+    for (const [id, raw] of Object.entries(decoded) as [FilterId, string][]) {
+      writeCache(id, raw)
+    }
+  }
+  window.history.replaceState(null, '', window.location.pathname + window.location.search)
 }
 
 /**
  * Declares which global filters a page opts into (plus any page-scoped ones,
- * e.g. `indicator`) and returns their resolved values kept in sync with the
- * URL — the source of truth — so state survives refresh and the back button.
+ * e.g. `indicator`) and returns their resolved values. Persisted to
+ * localStorage only — filter changes never touch the URL or add params.
  */
 export function useFilters<K extends FilterId>(
   pageFilterIds: readonly K[],
   defaultOverrides?: Partial<{ [P in K]: FilterValues[P] }>,
 ) {
-  const [search, setSearch] = useUrlSearch()
+  const [version, setVersion] = useState(() => {
+    applyShareTokenOnce()
+    return 0
+  })
 
   const values = useMemo(() => {
-    const urlParams = new URLSearchParams(search)
     const cached = readCache()
     const result = {} as { [P in K]: FilterValues[P] }
     for (const id of pageFilterIds) {
@@ -52,7 +59,6 @@ export function useFilters<K extends FilterId>(
       // and defaultOverrides[id] to the same FilterValues[id] together.
       result[id] = resolveFilterValue(
         FILTERS[id] as unknown as FilterDef<FilterValues[K]>,
-        urlParams,
         cached,
         pageFilterIds,
         defaultOverrides?.[id] as FilterValues[K] | undefined,
@@ -60,36 +66,11 @@ export function useFilters<K extends FilterId>(
     }
     return result
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, pageFilterIds.join(',')])
-
-  // Keep the URL a complete snapshot of resolved state (incl. cached/default
-  // values), so it's always a valid, shareable link — not just once touched.
-  useEffect(() => {
-    const urlParams = new URLSearchParams(search)
-    let changed = false
-    for (const id of pageFilterIds) {
-      const serialized = FILTERS[id].serialize(values[id] as never)
-      if (urlParams.get(id) !== serialized) {
-        urlParams.set(id, serialized)
-        changed = true
-      }
-    }
-    if (changed) {
-      window.history.replaceState(null, '', `${window.location.pathname}?${urlParams}`)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values, search])
+  }, [version, pageFilterIds.join(',')])
 
   const setFilter = <P extends K>(id: P, value: FilterValues[P]) => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const serialized = FILTERS[id].serialize(value as never)
-    urlParams.set(id, serialized)
-    window.history.pushState(null, '', `${window.location.pathname}?${urlParams}`)
-    setSearch(`?${urlParams}`)
-
-    if (FILTERS[id].scope === 'global') {
-      writeCache(id, serialized)
-    }
+    writeCache(id, FILTERS[id].serialize(value as never))
+    setVersion((v) => v + 1)
   }
 
   return { values, setFilter }

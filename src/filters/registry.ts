@@ -39,7 +39,7 @@ export const currentYear = () => new Date().getFullYear()
 export const yearRangeFilter: FilterDef<[number, number]> = {
   id: 'yearRange',
   scope: 'global',
-  default: [2015, currentYear()],
+  default: [currentYear() - 4, currentYear()],
   serialize: ([start, end]) => `${start}:${end}`,
   parse: (raw) => {
     const match = /^(\d{4}):(\d{4})$/.exec(raw)

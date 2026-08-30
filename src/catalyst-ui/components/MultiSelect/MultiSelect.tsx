@@ -50,7 +50,7 @@ export function MultiSelect({ label, options, value, onChange, max, min = 0 }: M
   // and everything outside the dropdown stay on `value` until it closes.
   const [pending, setPending] = useState<string[] | null>(null)
   const effective = pending ?? value
-  const selected = options.filter((o) => value.includes(o.value))
+  const selected = options.filter((o) => effective.includes(o.value))
 
   const commitChange = (next: string[]) => {
     if (pending !== null) setPending(next)

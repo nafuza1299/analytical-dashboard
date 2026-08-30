@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { CACHE_KEY, FILTERS, type FilterDef, type FilterId, type FilterValues } from './registry'
 import { resolveFilterValue } from './resolveFilterValue'
-import { decodeShareToken, readShareToken } from './shareLink'
+import { decodeShareToken } from './shareLink'
 
 function readCache(): Partial<Record<FilterId, string>> | null {
   try {
@@ -22,10 +22,12 @@ function writeCache(id: FilterId, serialized: string) {
   }
 }
 
-// One-time on load: a shared link's #s=<token> seeds the cache with its
-// filter values, then the hash is stripped so it doesn't linger in the URL.
+// One-time on load: a shared link's ?filter=<token> seeds the cache with its
+// filter values, then just that param is stripped so it doesn't linger in
+// the URL — `tab` (and anything else) stays, since that's the real route.
 function applyShareTokenOnce() {
-  const token = readShareToken()
+  const params = new URLSearchParams(window.location.search)
+  const token = params.get('filter')
   if (!token) return
   const decoded = decodeShareToken(token)
   if (decoded) {
@@ -33,7 +35,9 @@ function applyShareTokenOnce() {
       writeCache(id, raw)
     }
   }
-  window.history.replaceState(null, '', window.location.pathname + window.location.search)
+  params.delete('filter')
+  const query = params.toString()
+  window.history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''))
 }
 
 /**

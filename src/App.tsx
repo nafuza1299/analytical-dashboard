@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useContainerWidth } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
@@ -24,21 +24,34 @@ import { isAdditiveIndicator } from './charts/additiveIndicators'
 import { buildExportFilename } from './export/exportToExcel'
 import { CaptureButton } from './export/CaptureButton'
 import { ShareButton } from './export/ShareButton'
-import { findTabByIndicator, MENUS } from './navigation/menus'
+import { resolveRoute, MENUS } from './navigation/menus'
+import { navigate, useLocationSignal } from './navigation/router'
 import { MENU_ICONS } from './navigation/menuIcons'
 import { PageChartGrid } from './layout/PageChartGrid'
 import { clearLayoutCache } from './layout/gridLayout'
 
 function App() {
-  const { values, setFilter } = useFilters(['countries', 'yearRange', 'indicator'] as const)
+  const { values, setFilter } = useFilters(['countries', 'yearRange'] as const)
 
-  // Active menu/tab is derived from the indicator filter, not separate local
-  // state — a shared link's ?indicator= then highlights the right tab too.
-  const location = findTabByIndicator(values.indicator) ?? { menu: MENUS[0], tab: MENUS[0].tabs[0] }
+  // The URL (path = menu, `?tab=` = tab) is the source of truth for
+  // navigation — re-render on popstate, then re-derive from window.location.
+  useLocationSignal()
+  const location = resolveRoute(window.location.pathname, new URLSearchParams(window.location.search).get('tab'))
+  const indicatorCode = location.tab.indicatorCode
+
+  // Keeps the address bar canonical — a bare `/`, an unknown path, or a
+  // stray query param collapses to the resolved route, so "Share Page"
+  // always has a real URL to share.
+  useEffect(() => {
+    const canonical = `/${location.menu.key}?tab=${location.tab.key}`
+    if (window.location.pathname + window.location.search !== canonical) {
+      window.history.replaceState(null, '', canonical)
+    }
+  }, [location.menu.key, location.tab.key])
 
   const { data, isLoading, error, status, refetch } = useQuery({
-    queryKey: ['indicator', values.countries, values.indicator, values.yearRange],
-    queryFn: () => fetchIndicatorData(values.countries, values.indicator, values.yearRange),
+    queryKey: ['indicator', values.countries, indicatorCode, values.yearRange],
+    queryFn: () => fetchIndicatorData(values.countries, indicatorCode, values.yearRange),
     // The Countries filter can now be cleared down to none (see MultiSelect's
     // "Clear all") — an empty country list would otherwise fire a malformed
     // request to the World Bank API instead of just showing a prompt below.
@@ -87,7 +100,7 @@ function App() {
 
   const barRows = data ? latestYearRows(data) : []
   const pieRows =
-    data && isAdditiveIndicator(values.indicator)
+    data && isAdditiveIndicator(indicatorCode)
       ? latestYearRows(data).filter((r) => r.value !== null && r.value > 0)
       : []
   const indicatorName = data?.[0]?.indicatorName ?? location.tab.label
@@ -131,7 +144,7 @@ function App() {
           activeKey={location.menu.key}
           onSelect={(key) => {
             const menu = MENUS.find((m) => m.key === key)
-            if (menu) setFilter('indicator', menu.tabs[0].indicatorCode)
+            if (menu) navigate(`/${menu.key}?tab=${menu.tabs[0].key}`)
           }}
           open={mobileNavOpen}
           onOpenChange={setMobileNavOpen}
@@ -148,7 +161,7 @@ function App() {
               key={tab.key}
               type="button"
               aria-current={active ? 'page' : undefined}
-              onClick={() => setFilter('indicator', tab.indicatorCode)}
+              onClick={() => navigate(`/${location.menu.key}?tab=${tab.key}`)}
               className={[
                 'shrink-0 whitespace-nowrap rounded-t-lg px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                 active
@@ -175,12 +188,12 @@ function App() {
               format="pdf"
               label="Export as PDF"
             />
-            <ShareButton values={values} />
+            <ShareButton menuKey={location.menu.key} tabKey={location.tab.key} values={values} />
             <Button
               variant="ghost"
               size="sm"
               onClick={() => {
-                clearLayoutCache(values.indicator)
+                clearLayoutCache(indicatorCode)
                 setLayoutResetNonce((n) => n + 1)
               }}
             >
@@ -246,8 +259,8 @@ function App() {
 
         {!isLoading && !error && data && data.length > 0 && (
             <PageChartGrid
-              key={`${values.indicator}-${layoutResetNonce}`}
-              pageKey={values.indicator}
+              key={`${indicatorCode}-${layoutResetNonce}`}
+              pageKey={indicatorCode}
               width={gridWidth}
             >
               <div key="line">
@@ -283,7 +296,7 @@ function App() {
                   canCapture={canCapture && pieRows.length > 0}
                   periodLabel={periodLabel}
                 >
-                  <IndicatorPieChart rows={data} indicatorCode={values.indicator} />
+                  <IndicatorPieChart rows={data} indicatorCode={indicatorCode} />
                   <p className="text-sm text-text-muted">
                     Hidden automatically for non-additive indicators (rates, percentages).
                   </p>

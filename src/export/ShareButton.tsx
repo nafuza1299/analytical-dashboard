@@ -5,15 +5,20 @@ import { buildShareUrl } from '../filters/shareLink'
 import type { FilterValues } from '../filters/registry'
 
 interface Props {
+  menuKey: string
+  tabKey: string
   values: FilterValues
 }
 
-export function ShareButton({ values }: Props) {
+export function ShareButton({ menuKey, tabKey, values }: Props) {
   const [open, setOpen] = useState(false)
   const [includeFilters, setIncludeFilters] = useState(true)
   const [copied, setCopied] = useState(false)
 
-  const url = useMemo(() => buildShareUrl(values, includeFilters), [values, includeFilters])
+  const url = useMemo(
+    () => buildShareUrl(menuKey, tabKey, values, includeFilters),
+    [menuKey, tabKey, values, includeFilters],
+  )
 
   const copy = async () => {
     await navigator.clipboard.writeText(url)

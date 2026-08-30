@@ -1,15 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { findTabByIndicator, MENUS } from './menus'
+import { resolveRoute, MENUS } from './menus'
 
-describe('findTabByIndicator', () => {
-  it('finds the menu and tab for a known indicator code', () => {
-    const result = findTabByIndicator('SP.DYN.LE00.IN')
-    expect(result?.menu.key).toBe('health')
-    expect(result?.tab.key).toBe('life-expectancy')
+describe('resolveRoute', () => {
+  it('resolves a known menu and tab from the path and query', () => {
+    const result = resolveRoute('/health', 'life-expectancy')
+    expect(result.menu.key).toBe('health')
+    expect(result.tab.key).toBe('life-expectancy')
   })
 
-  it('returns undefined for an indicator no tab declares', () => {
-    expect(findTabByIndicator('NOT.A.REAL.CODE')).toBeUndefined()
+  it('falls back to the first tab when the tab param is missing or unknown', () => {
+    expect(resolveRoute('/health', null).tab.key).toBe('life-expectancy')
+    expect(resolveRoute('/health', 'not-a-tab').tab.key).toBe('life-expectancy')
+  })
+
+  it('falls back to the first menu for an unknown or root path', () => {
+    expect(resolveRoute('/', null).menu.key).toBe('economy')
+    expect(resolveRoute('/nope', null).menu.key).toBe('economy')
   })
 
   it('every tab has a unique indicator code', () => {

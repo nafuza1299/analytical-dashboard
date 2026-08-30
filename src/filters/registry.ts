@@ -51,20 +51,9 @@ export const yearRangeFilter: FilterDef<[number, number]> = {
   },
 }
 
-const INDICATOR_CODE = /^[A-Z0-9.]+$/i
-
-export const indicatorFilter: FilterDef<string> = {
-  id: 'indicator',
-  scope: 'page',
-  default: 'NY.GDP.MKTP.CD',
-  serialize: (code) => code,
-  parse: (raw) => (INDICATOR_CODE.test(raw) ? raw.toUpperCase() : null),
-}
-
 export const FILTERS = {
   countries: countriesFilter,
   yearRange: yearRangeFilter,
-  indicator: indicatorFilter,
 } as const
 
 export type FilterId = keyof typeof FILTERS

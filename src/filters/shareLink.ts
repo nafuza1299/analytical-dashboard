@@ -1,7 +1,5 @@
 import { FILTERS, type FilterId, type FilterValues } from './registry'
 
-const HASH_PREFIX = '#s='
-
 export function encodeShareToken(values: FilterValues): string {
   const params = new URLSearchParams()
   for (const id of Object.keys(FILTERS) as FilterId[]) {
@@ -24,12 +22,13 @@ export function decodeShareToken(token: string): Partial<Record<FilterId, string
   }
 }
 
-export function buildShareUrl(values: FilterValues, includeFilters: boolean): string {
-  const base = `${window.location.origin}${window.location.pathname}`
-  return includeFilters ? `${base}${HASH_PREFIX}${encodeShareToken(values)}` : base
-}
-
-export function readShareToken(): string | null {
-  const hash = window.location.hash
-  return hash.startsWith(HASH_PREFIX) ? hash.slice(HASH_PREFIX.length) : null
+export function buildShareUrl(
+  menuKey: string,
+  tabKey: string,
+  values: FilterValues,
+  includeFilters: boolean,
+): string {
+  const params = new URLSearchParams({ tab: tabKey })
+  if (includeFilters) params.set('filter', encodeShareToken(values))
+  return `${window.location.origin}/${menuKey}?${params.toString()}`
 }

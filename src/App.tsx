@@ -105,6 +105,9 @@ function App() {
       : []
   const indicatorName = data?.[0]?.indicatorName ?? location.tab.label
   const periodLabel = `${values.yearRange[0]}–${values.yearRange[1]}`
+  // Bar and pie only ever show the latest year's snapshot, not the full
+  // range, so their subtitle should say which single year that is.
+  const latestYearLabel = barRows[0] ? String(barRows[0].year) : periodLabel
   const filenameFor = (kind: string, ext: 'xlsx' | 'png' | 'pdf') =>
     buildExportFilename(indicatorName, values.countries, values.yearRange, kind, ext)
 
@@ -282,7 +285,7 @@ function App() {
                   exportFilename={filenameFor('bar', 'xlsx')}
                   captureFilename={filenameFor('bar', 'png')}
                   canCapture={canCapture}
-                  periodLabel={periodLabel}
+                  periodLabel={latestYearLabel}
                 >
                   <IndicatorBarChart rows={data} />
                 </ChartCard>
@@ -294,7 +297,7 @@ function App() {
                   exportFilename={filenameFor('pie', 'xlsx')}
                   captureFilename={filenameFor('pie', 'png')}
                   canCapture={canCapture && pieRows.length > 0}
-                  periodLabel={periodLabel}
+                  periodLabel={latestYearLabel}
                 >
                   <IndicatorPieChart rows={data} indicatorCode={indicatorCode} />
                   <p className="text-sm text-text-muted">

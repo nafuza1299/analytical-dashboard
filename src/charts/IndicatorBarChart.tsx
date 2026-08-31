@@ -16,7 +16,7 @@ export function IndicatorBarChart({ rows }: Props) {
       <BarChart data={yearRows} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
         <XAxis dataKey="countryName" tick={axisTickStyle} />
-        <YAxis width={70} tickFormatter={formatCompact} tick={axisTickStyle} />
+        <YAxis width={70} tickFormatter={formatCompact} tick={axisTickStyle} axisLine={false} tickLine={false} />
         <Tooltip formatter={(value) => formatFull(Number(value))} cursor={cursorFill} {...tooltipProps} />
         <Bar dataKey="value" fill="#2563eb" />
       </BarChart>

@@ -20,8 +20,9 @@ export function formatFull(value: number): string {
   return fullFormatter.format(value)
 }
 
-// Matches Card.Title's font so axis numbers read like the chart title.
-export const axisTickStyle = { fontFamily: 'var(--font-sans)', fontSize: 16 }
+// Same font as Card.Title, sized down from the title's own size so axis
+// numbers don't compete with it (16px -> 10px -> +15% -> 12px).
+export const axisTickStyle = { fontFamily: 'var(--font-sans)', fontSize: 12 }
 
 // Skips overlapping ticks instead of rotating/truncating labels.
 export const xAxisTickProps = { interval: 'preserveStartEnd' as const, tick: axisTickStyle }

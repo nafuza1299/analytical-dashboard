@@ -14,7 +14,7 @@ export function IndicatorBarChart({ rows }: Props) {
   return (
     <ResponsiveContainer width="100%" height="100%" minHeight={200}>
       <BarChart data={yearRows} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
+        <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
         <XAxis dataKey="countryName" tick={axisTickStyle} />
         <YAxis width={70} tickFormatter={formatCompact} tick={axisTickStyle} />
         <Tooltip formatter={(value) => formatFull(Number(value))} cursor={cursorFill} {...tooltipProps} />

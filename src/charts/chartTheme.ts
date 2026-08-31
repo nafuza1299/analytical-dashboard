@@ -6,7 +6,10 @@ export const LOCALE = 'id-ID'
 
 export const CHART_COLORS = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#0891b2']
 
-const compactFormatter = new Intl.NumberFormat(LOCALE, { notation: 'compact', maximumFractionDigits: 1 })
+// English abbreviation letters (K/M/B/T) — id-ID's compact notation uses
+// "M" for miliar (billion) and "jt" for juta (million), which reads as the
+// wrong magnitude to an English-reading audience.
+const compactFormatter = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 })
 const fullFormatter = new Intl.NumberFormat(LOCALE, { maximumFractionDigits: 2 })
 
 export function formatCompact(value: number): string {
@@ -36,6 +39,10 @@ export const legendProps = {
     maxHeight: 280,
     overflowY: 'auto' as const,
   },
+  // Overrides recharts' default of coloring each item's text like its
+  // series swatch — themed black/white instead so the text stays legible
+  // regardless of series color or light/dark mode.
+  labelStyle: { color: 'var(--color-text)' },
 }
 
 // Tooltip box themed off the same CSS variables as the rest of the app, so it
@@ -58,3 +65,8 @@ export const tooltipProps = {
 // recharts' default light grey, which washed out on dark backgrounds.
 export const cursorFill = { fill: 'var(--color-surface-hover)' }
 export const cursorLine = { stroke: 'var(--color-border)' }
+
+// CartesianGrid's default stroke (#ccc) is a light grey — fine on white,
+// glaring against the dark theme's near-black surface. The border token
+// tracks both themes already.
+export const gridStroke = 'var(--color-border)'

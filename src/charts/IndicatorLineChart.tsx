@@ -7,6 +7,7 @@ import {
   cursorLine,
   formatCompact,
   formatFull,
+  gridStroke,
   legendProps,
   tooltipProps,
   xAxisTickProps,
@@ -77,7 +78,7 @@ export function IndicatorLineChart({ rows }: Props) {
   return (
     <ResponsiveContainer width="100%" height="100%" minHeight={200}>
       <LineChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
-        <CartesianGrid vertical={false} />
+        <CartesianGrid vertical={false} stroke={gridStroke} />
         <XAxis dataKey="year" {...xAxisTickProps} />
         <YAxis width={70} tickFormatter={formatCompact} tick={axisTickStyle} axisLine={false} tickLine={false} />
         <Tooltip formatter={(value) => formatFull(Number(value))} cursor={cursorLine} {...tooltipProps} />

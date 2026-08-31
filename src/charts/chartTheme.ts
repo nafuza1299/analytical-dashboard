@@ -39,6 +39,9 @@ export const legendProps = {
     fontSize: 12,
     maxHeight: 280,
     overflowY: 'auto' as const,
+    // Gap between the plotted chart and the legend column: the chart's own
+    // right margin (16px) increased 10%.
+    paddingLeft: 18,
   },
   // Overrides recharts' default of coloring each item's text like its
   // series swatch — themed black/white instead so the text stays legible
@@ -55,7 +58,7 @@ export const tooltipProps = {
     border: '1px solid var(--color-border)',
     borderRadius: 8,
     fontFamily: 'var(--font-sans)',
-    fontSize: 14,
+    fontSize: 12,
   },
   labelStyle: { color: 'var(--color-text)' },
   itemStyle: { color: 'var(--color-text)' },

@@ -20,6 +20,7 @@ type SectorProps = {
   fill?: string
   name?: string
   index?: number
+  isActive?: boolean
 }
 
 const RADIAN = Math.PI / 180
@@ -40,7 +41,7 @@ function makeOverlapAwareSector() {
   const seenBuckets = new Set<string>()
   const decided = new Map<number, boolean>()
   return function renderSector(props: SectorProps) {
-    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, midAngle, fill, name, index } = props
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, midAngle, fill, name, index, isActive } = props
     if (cx == null || cy == null || !outerRadius) return null
     const labelRadius = outerRadius + 12
     const lx = cx + labelRadius * Math.cos(-(midAngle ?? 0) * RADIAN)
@@ -51,6 +52,12 @@ function makeOverlapAwareSector() {
       showLabel = !seenBuckets.has(key)
       if (showLabel) seenBuckets.add(key)
       if (index != null) decided.set(index, showLabel)
+    }
+    // Hovering a slice always shows its label plus a leader line to it,
+    // even if overlap-hiding suppressed that label normally.
+    const edgePoint = {
+      x: cx + outerRadius * Math.cos(-(midAngle ?? 0) * RADIAN),
+      y: cy + outerRadius * Math.sin(-(midAngle ?? 0) * RADIAN),
     }
     return (
       <g>
@@ -64,7 +71,10 @@ function makeOverlapAwareSector() {
           fill={fill}
           stroke="var(--color-surface)"
         />
-        {showLabel && (
+        {isActive && (
+          <line x1={edgePoint.x} y1={edgePoint.y} x2={lx} y2={ly} stroke={fill} />
+        )}
+        {(showLabel || isActive) && (
           <text
             x={lx}
             y={ly}

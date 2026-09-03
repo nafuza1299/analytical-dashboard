@@ -2,7 +2,8 @@ import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Sector, Tooltip } fro
 import type { DataRow } from '../api/worldBank'
 import { latestYearRows } from './latestYearRows'
 import { isAdditiveIndicator } from './additiveIndicators'
-import { CHART_COLORS, formatFull, legendProps, tooltipProps } from './chartTheme'
+import { ChartTooltipContent } from './ChartTooltipContent'
+import { CHART_COLORS, isCurrencyIndicator, legendProps, tooltipProps } from './chartTheme'
 
 interface Props {
   rows: DataRow[]
@@ -100,6 +101,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
   const yearRows = latestYearRows(rows).filter((r) => r.value !== null && r.value > 0)
   if (yearRows.length === 0) return null
   const year = yearRows[0].year
+  const isCurrency = isCurrencyIndicator(indicatorCode)
 
   return (
     <div className="flex h-full flex-col">
@@ -122,7 +124,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
                 <Cell key={r.countryCode} fill={CHART_COLORS[i % CHART_COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => formatFull(Number(value))} {...tooltipProps} />
+            <Tooltip content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} />} {...tooltipProps} />
             <Legend {...legendProps} />
           </PieChart>
         </ResponsiveContainer>

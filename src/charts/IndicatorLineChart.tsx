@@ -1,13 +1,14 @@
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { DataRow } from '../api/worldBank'
 import { pivotByYear } from './pivotByYear'
+import { ChartTooltipContent } from './ChartTooltipContent'
 import {
   CHART_COLORS,
   axisTickStyle,
   cursorLine,
   formatCompact,
-  formatFull,
   gridStroke,
+  isCurrencyIndicator,
   legendProps,
   tooltipProps,
   xAxisTickProps,
@@ -74,6 +75,7 @@ export function IndicatorLineChart({ rows }: Props) {
   const data = pivotByYear(rows)
   const countries = [...new Map(rows.map((r) => [r.countryCode, r.countryName]))]
   const dotLabelerFor = makeSharedDotLabeler()
+  const isCurrency = isCurrencyIndicator(rows[0]?.indicatorCode)
 
   return (
     <ResponsiveContainer width="100%" height="100%" minHeight={200}>
@@ -81,7 +83,11 @@ export function IndicatorLineChart({ rows }: Props) {
         <CartesianGrid vertical={false} stroke={gridStroke} />
         <XAxis dataKey="year" {...xAxisTickProps} />
         <YAxis width={70} tickFormatter={formatCompact} tick={axisTickStyle} axisLine={false} tickLine={false} />
-        <Tooltip formatter={(value) => formatFull(Number(value))} cursor={cursorLine} {...tooltipProps} />
+        <Tooltip
+          cursor={cursorLine}
+          content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} />}
+          {...tooltipProps}
+        />
         <Legend {...legendProps} />
         {countries.map(([code, name], i) => {
           const color = CHART_COLORS[i % CHART_COLORS.length]

@@ -20,6 +20,18 @@ export function formatFull(value: number): string {
   return fullFormatter.format(value)
 }
 
+// Only GDP is US$-denominated (World Bank's ".CD" suffix) — Inflation/Trade
+// and most other indicators are %, years, or other units where a $ prefix
+// would be wrong. Same maintained-allowlist approach as isAdditiveIndicator,
+// for the same reason: the API doesn't flag units itself.
+const CURRENCY_INDICATOR_CODES = new Set([
+  'NY.GDP.MKTP.CD', // GDP (current US$)
+])
+
+export function isCurrencyIndicator(indicatorCode: string | undefined): boolean {
+  return indicatorCode != null && CURRENCY_INDICATOR_CODES.has(indicatorCode)
+}
+
 // Same font as Card.Title, sized down from the title's own size so axis
 // numbers don't compete with it (16px -> 10px -> +15% -> 12px).
 export const axisTickStyle = { fontFamily: 'var(--font-sans)', fontSize: 12 }
@@ -49,19 +61,41 @@ export const legendProps = {
   labelStyle: { color: 'var(--color-text)' },
 }
 
-// Tooltip box themed off the same CSS variables as the rest of the app, so it
-// reads as app chrome instead of recharts' default stark-white popup — which
-// was blinding on the dark theme.
+// Box styling/wrapping lives in ChartTooltipContent (the custom `content`
+// renderer, needed for the legend-style swatch and the $-prefix, both of
+// which need per-chart data DefaultTooltipContent can't take — so `content`
+// is wired up per chart instead of living here). What's left here is
+// wrapper-level: position and scroll behavior, which apply regardless of
+// what renders inside.
 export const tooltipProps = {
-  contentStyle: {
-    backgroundColor: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 8,
-    fontFamily: 'var(--font-sans)',
-    fontSize: 12,
+  wrapperStyle: {
+    // Recharts positions the wrapper via a calculated `transform:
+    // translate(x,y)` that chases the cursor, flipping above/below/left/
+    // right to (try to) stay on-screen — with a tall, many-row tooltip this
+    // kept flipping to a spot that ran past the card's top or bottom edge
+    // (clipped by the card's own overflow-hidden) no matter which offset or
+    // escape-viewbox knob was tuned. Pinning it to the chart's own center
+    // sidesteps the whole fits-on-screen calculation: `top`/`left` here
+    // override recharts' `0`/`0`, and `transform` overrides its computed
+    // translate (recharts merges wrapperStyle in last), centering the box
+    // in `.recharts-wrapper` (the chart's own positioned container) instead
+    // of chasing the hovered point.
+    position: 'absolute' as const,
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    maxHeight: 280,
+    overflowY: 'auto' as const,
+    // Recharts defaults this wrapper to pointer-events: none so chart hover
+    // tracking passes through it — but that also blocks wheel/scroll input,
+    // making the maxHeight above unscrollable. Re-enable it just here.
+    pointerEvents: 'auto' as const,
+    // <Tooltip> is declared before <Legend> in every chart, so without this
+    // the legend (same DOM stacking context, no z-index of its own) paints
+    // and hit-tests above the tooltip wherever the two overlap — swallowing
+    // hover/scroll input meant for the tooltip.
+    zIndex: 10,
   },
-  labelStyle: { color: 'var(--color-text)' },
-  itemStyle: { color: 'var(--color-text)' },
 }
 
 // Tooltip's hover-highlight cursor (the rectangle behind a bar / vertical

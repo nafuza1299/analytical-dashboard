@@ -1,3 +1,5 @@
+import { useCallback, useMemo, useState } from 'react'
+
 // Shared across all chart types so every axis/tooltip/legend formats numbers
 // and colors the same way. Locale is Indonesian per the plan's own callout
 // (1.234,56 grouping/decimal, not the 1,234.56 default) — swap here if the
@@ -61,30 +63,18 @@ export const legendProps = {
   labelStyle: { color: 'var(--color-text)' },
 }
 
+const TOOLTIP_MAX_HEIGHT = 280
+
 // Box styling/wrapping lives in ChartTooltipContent (the custom `content`
 // renderer, needed for the legend-style swatch and the $-prefix, both of
 // which need per-chart data DefaultTooltipContent can't take — so `content`
 // is wired up per chart instead of living here). What's left here is
-// wrapper-level: position and scroll behavior, which apply regardless of
-// what renders inside.
+// wrapper-level: scroll behavior, which applies regardless of what renders
+// inside. Vertical position is handled separately by useTooltipCenterY
+// below, since it needs the chart's own rendered height.
 export const tooltipProps = {
   wrapperStyle: {
-    // Recharts positions the wrapper via a calculated `transform:
-    // translate(x,y)` that chases the cursor, flipping above/below/left/
-    // right to (try to) stay on-screen — with a tall, many-row tooltip this
-    // kept flipping to a spot that ran past the card's top or bottom edge
-    // (clipped by the card's own overflow-hidden) no matter which offset or
-    // escape-viewbox knob was tuned. Pinning it to the chart's own center
-    // sidesteps the whole fits-on-screen calculation: `top`/`left` here
-    // override recharts' `0`/`0`, and `transform` overrides its computed
-    // translate (recharts merges wrapperStyle in last), centering the box
-    // in `.recharts-wrapper` (the chart's own positioned container) instead
-    // of chasing the hovered point.
-    position: 'absolute' as const,
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    maxHeight: 280,
+    maxHeight: TOOLTIP_MAX_HEIGHT,
     overflowY: 'auto' as const,
     // Recharts defaults this wrapper to pointer-events: none so chart hover
     // tracking passes through it — but that also blocks wheel/scroll input,
@@ -96,6 +86,35 @@ export const tooltipProps = {
     // hover/scroll input meant for the tooltip.
     zIndex: 10,
   },
+}
+
+/** Keeps the tooltip horizontally near the cursor (recharts' normal
+ * left/right-flip behavior, unchanged — reachable with the mouse so the
+ * scrollable box above is actually usable) while pinning it vertically to
+ * the chart's own center via recharts' `position.y` (bypasses the
+ * fits-above/fits-below flip that was running a tall, many-row tooltip off
+ * the top or bottom of the card, clipped by the card's own overflow-hidden).
+ * `position.y` is in the same pixel space as the chart's rendered height,
+ * which ResponsiveContainer only reports through `onResize` — hence the
+ * state. Assumes the common/max-height case for centering rather than
+ * measuring the tooltip's own (variable, content-dependent) height, so a
+ * short tooltip sits a bit above true center instead of exactly centered —
+ * never clipped, just not pixel-perfect. */
+export function useTooltipCenterY() {
+  const [chartHeight, setChartHeight] = useState(0)
+  // Rounds before comparing: ResizeObserver reports sub-pixel-different
+  // floats on every pass even when nothing visibly changed, and setting
+  // state on every one of those would re-render every frame for no reason.
+  const onResize = useCallback((_width: number, height: number) => {
+    setChartHeight((prev) => (Math.round(prev) === Math.round(height) ? prev : height))
+  }, [])
+  // Memoized: recharts' Tooltip watches `position` by reference internally,
+  // so handing it a fresh `{ y }` object literal every render (even with an
+  // unchanged value) re-triggers that watcher every render — an infinite
+  // loop, confirmed via "Maximum update depth exceeded" in the console
+  // while testing this. Stable reference unless chartHeight actually moves.
+  const position = useMemo(() => ({ y: Math.max(0, chartHeight / 2 - TOOLTIP_MAX_HEIGHT / 2) }), [chartHeight])
+  return { onResize, position }
 }
 
 // Tooltip's hover-highlight cursor (the rectangle behind a bar / vertical

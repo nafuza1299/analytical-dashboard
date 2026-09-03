@@ -11,6 +11,7 @@ import {
   isCurrencyIndicator,
   legendProps,
   tooltipProps,
+  useTooltipCenterY,
   xAxisTickProps,
 } from './chartTheme'
 
@@ -72,19 +73,21 @@ function makeSharedDotLabeler() {
 }
 
 export function IndicatorLineChart({ rows }: Props) {
+  const { onResize, position } = useTooltipCenterY()
   const data = pivotByYear(rows)
   const countries = [...new Map(rows.map((r) => [r.countryCode, r.countryName]))]
   const dotLabelerFor = makeSharedDotLabeler()
   const isCurrency = isCurrencyIndicator(rows[0]?.indicatorCode)
 
   return (
-    <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+    <ResponsiveContainer width="100%" height="100%" minHeight={200} onResize={onResize}>
       <LineChart data={data} margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
         <CartesianGrid vertical={false} stroke={gridStroke} />
         <XAxis dataKey="year" {...xAxisTickProps} />
         <YAxis width={70} tickFormatter={formatCompact} tick={axisTickStyle} axisLine={false} tickLine={false} />
         <Tooltip
           cursor={cursorLine}
+          position={position}
           content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} />}
           {...tooltipProps}
         />

@@ -3,7 +3,7 @@ import type { DataRow } from '../api/worldBank'
 import { latestYearRows } from './latestYearRows'
 import { isAdditiveIndicator } from './additiveIndicators'
 import { ChartTooltipContent } from './ChartTooltipContent'
-import { CHART_COLORS, isCurrencyIndicator, legendProps, tooltipProps } from './chartTheme'
+import { CHART_COLORS, isCurrencyIndicator, legendProps, tooltipProps, useTooltipCenterY } from './chartTheme'
 
 interface Props {
   rows: DataRow[]
@@ -96,6 +96,7 @@ function makeOverlapAwareSector() {
 /** Share-of-total across countries for one year. Hidden entirely for non-additive
  * indicators (rates, percentages, per-capita) — summing those is meaningless. */
 export function IndicatorPieChart({ rows, indicatorCode }: Props) {
+  const { onResize, position } = useTooltipCenterY()
   if (!isAdditiveIndicator(indicatorCode)) return null
 
   const yearRows = latestYearRows(rows).filter((r) => r.value !== null && r.value > 0)
@@ -107,7 +108,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
     <div className="flex h-full flex-col">
       <p className="text-sm text-text-muted mb-2">Share of total ({year})</p>
       <div className="min-h-0 flex-1">
-        <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+        <ResponsiveContainer width="100%" height="100%" minHeight={200} onResize={onResize}>
           <PieChart>
             <Pie
               data={yearRows}
@@ -124,7 +125,11 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
                 <Cell key={r.countryCode} fill={CHART_COLORS[i % CHART_COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} />} {...tooltipProps} />
+            <Tooltip
+              position={position}
+              content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} />}
+              {...tooltipProps}
+            />
             <Legend {...legendProps} />
           </PieChart>
         </ResponsiveContainer>

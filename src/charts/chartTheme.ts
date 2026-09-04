@@ -63,30 +63,33 @@ export const legendProps = {
   labelStyle: { color: 'var(--color-text)' },
 }
 
-/** Legend click-to-filter, shared by every chart with a Legend. Plain click
- * isolates to just that series (click it again to reset to "all visible").
- * Shift+click toggles a series into/out of the current visible set, for
- * building up a custom multi-selection. Ctrl/Cmd+click explicitly hides one
- * series without touching the rest. */
+export type LegendClickEvent = { shiftKey?: boolean; ctrlKey?: boolean; metaKey?: boolean }
+
+/** Plain click isolates to just that series (click it again to reset to "all
+ * visible"). Shift+click toggles a series into/out of the current visible
+ * set, for building up a custom multi-selection. Ctrl/Cmd+click explicitly
+ * hides one series without touching the rest. Pure reducer, split out from
+ * useLegendSelection below so the branching is unit-testable without React. */
+export function nextLegendHidden(prev: Set<string>, allKeys: string[], key: string, event: LegendClickEvent) {
+  if (event.ctrlKey || event.metaKey) return new Set(prev).add(key)
+  if (event.shiftKey) {
+    const next = new Set(prev)
+    if (next.has(key)) next.delete(key)
+    else next.add(key)
+    return next
+  }
+  const isolatedToThisKey = allKeys.length - prev.size === 1 && !prev.has(key)
+  return isolatedToThisKey ? new Set<string>() : new Set(allKeys.filter((k) => k !== key))
+}
+
+// Legend click-to-filter, shared by every chart with a Legend.
 export function useLegendSelection(allKeys: string[]) {
   const [hidden, setHidden] = useState<Set<string>>(() => new Set())
 
   const isHidden = useCallback((key: string) => hidden.has(key), [hidden])
 
   const onLegendClick = useCallback(
-    (key: string, event: { shiftKey?: boolean; ctrlKey?: boolean; metaKey?: boolean }) => {
-      setHidden((prev) => {
-        if (event.ctrlKey || event.metaKey) return new Set(prev).add(key)
-        if (event.shiftKey) {
-          const next = new Set(prev)
-          if (next.has(key)) next.delete(key)
-          else next.add(key)
-          return next
-        }
-        const isolatedToThisKey = allKeys.length - prev.size === 1 && !prev.has(key)
-        return isolatedToThisKey ? new Set() : new Set(allKeys.filter((k) => k !== key))
-      })
-    },
+    (key: string, event: LegendClickEvent) => setHidden((prev) => nextLegendHidden(prev, allKeys, key, event)),
     [allKeys],
   )
 

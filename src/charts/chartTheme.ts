@@ -63,6 +63,42 @@ export const legendProps = {
   labelStyle: { color: 'var(--color-text)' },
 }
 
+/** Legend click-to-filter, shared by every chart with a Legend. Plain click
+ * isolates to just that series (click it again to reset to "all visible").
+ * Shift+click toggles a series into/out of the current visible set, for
+ * building up a custom multi-selection. Ctrl/Cmd+click explicitly hides one
+ * series without touching the rest. */
+export function useLegendSelection(allKeys: string[]) {
+  const [hidden, setHidden] = useState<Set<string>>(() => new Set())
+
+  const isHidden = useCallback((key: string) => hidden.has(key), [hidden])
+
+  const onLegendClick = useCallback(
+    (key: string, event: { shiftKey?: boolean; ctrlKey?: boolean; metaKey?: boolean }) => {
+      setHidden((prev) => {
+        if (event.ctrlKey || event.metaKey) return new Set(prev).add(key)
+        if (event.shiftKey) {
+          const next = new Set(prev)
+          if (next.has(key)) next.delete(key)
+          else next.add(key)
+          return next
+        }
+        const isolatedToThisKey = allKeys.length - prev.size === 1 && !prev.has(key)
+        return isolatedToThisKey ? new Set() : new Set(allKeys.filter((k) => k !== key))
+      })
+    },
+    [allKeys],
+  )
+
+  return { isHidden, onLegendClick }
+}
+
+// Legend text for a hidden series — greyed and struck through so the toggle
+// state is visible at a glance, on top of the click handling above.
+export function legendItemStyle(hidden: boolean) {
+  return { opacity: hidden ? 0.5 : 1, textDecoration: hidden ? ('line-through' as const) : 'none', cursor: 'pointer' }
+}
+
 const TOOLTIP_MAX_HEIGHT = 280
 
 // Box styling/wrapping lives in ChartTooltipContent (the custom `content`

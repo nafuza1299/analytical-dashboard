@@ -3,7 +3,15 @@ import type { DataRow } from '../api/worldBank'
 import { latestYearRows } from './latestYearRows'
 import { isAdditiveIndicator } from './additiveIndicators'
 import { ChartTooltipContent } from './ChartTooltipContent'
-import { CHART_COLORS, isCurrencyIndicator, legendProps, tooltipProps, useTooltipCenterY } from './chartTheme'
+import {
+  CHART_COLORS,
+  isCurrencyIndicator,
+  legendItemStyle,
+  legendProps,
+  tooltipProps,
+  useLegendSelection,
+  useTooltipCenterY,
+} from './chartTheme'
 
 interface Props {
   rows: DataRow[]
@@ -43,7 +51,11 @@ function makeOverlapAwareSector() {
   const decided = new Map<number, boolean>()
   return function renderSector(props: SectorProps) {
     const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, midAngle, fill, name, index, isActive } = props
-    if (cx == null || cy == null || !outerRadius) return null
+    // Legend-hidden countries are zeroed to 0 rather than removed (see
+    // IndicatorPieChart), which collapses their wedge to a zero-degree
+    // angle — draw nothing for it, or its label would still float at
+    // that angle with no visible slice behind it.
+    if (cx == null || cy == null || !outerRadius || startAngle === endAngle) return null
     const labelRadius = outerRadius + 12
     const lx = cx + labelRadius * Math.cos(-(midAngle ?? 0) * RADIAN)
     const ly = cy + labelRadius * Math.sin(-(midAngle ?? 0) * RADIAN)
@@ -97,12 +109,17 @@ function makeOverlapAwareSector() {
  * indicators (rates, percentages, per-capita) — summing those is meaningless. */
 export function IndicatorPieChart({ rows, indicatorCode }: Props) {
   const { onResize, position } = useTooltipCenterY()
-  if (!isAdditiveIndicator(indicatorCode)) return null
-
   const yearRows = latestYearRows(rows).filter((r) => r.value !== null && r.value > 0)
+  const { isHidden, onLegendClick } = useLegendSelection(yearRows.map((r) => r.countryCode))
+  if (!isAdditiveIndicator(indicatorCode)) return null
   if (yearRows.length === 0) return null
   const year = yearRows[0].year
   const isCurrency = isCurrencyIndicator(indicatorCode)
+  // Zeroing out a hidden country's value (instead of removing its row) keeps
+  // it in the Pie's data — and therefore in the Legend, which derives its
+  // items from that data — while recomputing every other slice's share of
+  // total to exclude it, same as removing it from the sum would.
+  const visibleRows = yearRows.map((r) => (isHidden(r.countryCode) ? { ...r, value: 0 } : r))
 
   return (
     <div className="flex h-full flex-col">
@@ -111,7 +128,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
         <ResponsiveContainer width="100%" height="100%" minHeight={200} onResize={onResize}>
           <PieChart>
             <Pie
-              data={yearRows}
+              data={visibleRows}
               dataKey="value"
               nameKey="countryName"
               outerRadius="65%"
@@ -121,7 +138,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
               // it is the fix, not a stylistic choice. Revisit if recharts patches it.
               isAnimationActive={false}
             >
-              {yearRows.map((r, i) => (
+              {visibleRows.map((r, i) => (
                 <Cell key={r.countryCode} fill={CHART_COLORS[i % CHART_COLORS.length]} />
               ))}
             </Pie>
@@ -130,7 +147,17 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
               content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} />}
               {...tooltipProps}
             />
-            <Legend {...legendProps} />
+            <Legend
+              {...legendProps}
+              onClick={(entry, _index, event) =>
+                onLegendClick((entry.payload as { countryCode: string }).countryCode, event)
+              }
+              formatter={(value, entry) => (
+                <span style={legendItemStyle(isHidden((entry.payload as { countryCode: string }).countryCode))}>
+                  {value}
+                </span>
+              )}
+            />
           </PieChart>
         </ResponsiveContainer>
       </div>

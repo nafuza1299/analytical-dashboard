@@ -9,8 +9,10 @@ import {
   formatCompact,
   gridStroke,
   isCurrencyIndicator,
+  legendItemStyle,
   legendProps,
   tooltipProps,
+  useLegendSelection,
   useTooltipCenterY,
   xAxisTickProps,
 } from './chartTheme'
@@ -78,6 +80,7 @@ export function IndicatorLineChart({ rows }: Props) {
   const countries = [...new Map(rows.map((r) => [r.countryCode, r.countryName]))]
   const dotLabelerFor = makeSharedDotLabeler()
   const isCurrency = isCurrencyIndicator(rows[0]?.indicatorCode)
+  const { isHidden, onLegendClick } = useLegendSelection(countries.map(([code]) => code))
 
   return (
     <ResponsiveContainer width="100%" height="100%" minHeight={200} onResize={onResize}>
@@ -91,7 +94,13 @@ export function IndicatorLineChart({ rows }: Props) {
           content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} />}
           {...tooltipProps}
         />
-        <Legend {...legendProps} />
+        <Legend
+          {...legendProps}
+          onClick={(entry, _index, event) => onLegendClick(String(entry.dataKey), event)}
+          formatter={(value, entry) => (
+            <span style={legendItemStyle(isHidden(String(entry.dataKey)))}>{value}</span>
+          )}
+        />
         {countries.map(([code, name], i) => {
           const color = CHART_COLORS[i % CHART_COLORS.length]
           return (
@@ -103,6 +112,7 @@ export function IndicatorLineChart({ rows }: Props) {
               stroke={color}
               connectNulls={false}
               dot={dotLabelerFor(code, color)}
+              hide={isHidden(code)}
             />
           )
         })}

@@ -1,1 +1,19 @@
 @import "./catalyst-ui/styles/tokens.css";
+
+/*
+  Light-mode primary shifted one step down the blue ramp (blue-600 -> blue-700,
+  hover blue-700 -> blue-800). catalyst-ui's #2563eb renders the *active*
+  SideNav label as primary text on a `bg-primary/10` tint, which composites to
+  #e5ebf8 and scores 4.32:1 — under the 4.5:1 WCAG AA minimum for body text,
+  and caught by the axe scan in `e2e/dashboard.spec.ts`. Overridden here rather
+  than in tokens.css because `src/catalyst-ui/` is vendored read-only; upstream
+  the same change into catalyst-ui when convenient and drop this block.
+
+  Scoped with `:not([data-theme="dark"])` deliberately: `[data-theme="dark"]`
+  and a bare `:root` have identical specificity, so an unscoped override would
+  come later in the cascade and win in dark mode too.
+*/
+:root:not([data-theme="dark"]) {
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+}

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
 
 // Every test seeds the same two countries / three years so the dashboard is
 // deterministic — the app's own default is "all countries, last 5 years".
@@ -145,4 +146,16 @@ test('an indicator with no rows shows the empty state, not a broken chart', asyn
 
   await expect(page.getByText('No data for this selection')).toBeVisible()
   await expect(page.getByText('Raw data')).toHaveCount(0)
+})
+
+test('the loaded dashboard has no detectable WCAG A/AA violations', async ({ page }) => {
+  await mockWorldBank(page)
+  await page.goto('/economy?tab=gdp')
+  await expect(page.getByText('GDP (current US$) over time')).toBeVisible()
+
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze()
+
+  expect(results.violations).toEqual([])
 })

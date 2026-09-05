@@ -1,6 +1,8 @@
 # Analytical Dashboard
 
-A static analytics dashboard over the [World Bank Indicators API](https://api.worldbank.org/v2) — no backend, no API key. Built as a portfolio piece to demonstrate the parts of a chart dashboard that don't come for free with a charting library.
+> Portfolio project by [nafuza1299](https://github.com/nafuza1299). Live: [analytical-dashboard.vercel.app](https://analytical-dashboard.vercel.app/) · Source: [github.com/nafuza1299/analytical-dashboard](https://github.com/nafuza1299/analytical-dashboard) · [MIT License](LICENSE).
+
+A static analytics dashboard over the [World Bank Indicators API](https://api.worldbank.org/v2) — no backend, no API key. Built to demonstrate the parts of a chart dashboard that don't come for free with a charting library — see "What this actually demonstrates" below.
 
 **Stack:** Vite + React 19 + TypeScript, [catalyst-ui](../catalyst-ui) (personal component library) for layout/UI, Recharts, TanStack Query, react-grid-layout, SheetJS, html2canvas-pro + jsPDF.
 
@@ -9,7 +11,8 @@ A static analytics dashboard over the [World Bank Indicators API](https://api.wo
 ```bash
 npm install
 npm run dev      # dev server
-npm test         # vitest
+npm test         # vitest (unit)
+npm run test:e2e # playwright (end-to-end, stubs the World Bank API)
 npm run build    # typecheck + production build
 ```
 

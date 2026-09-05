@@ -4,7 +4,7 @@ import { latestYearRows } from './latestYearRows'
 import { isAdditiveIndicator } from './additiveIndicators'
 import { ChartTooltipContent } from './ChartTooltipContent'
 import {
-  CHART_COLORS,
+  getSeriesColor,
   indicatorSuffix,
   isCurrencyIndicator,
   legendItemStyle,
@@ -141,7 +141,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
               isAnimationActive={false}
             >
               {visibleRows.map((r, i) => (
-                <Cell key={r.countryCode} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                <Cell key={r.countryCode} fill={getSeriesColor(i, visibleRows.length)} />
               ))}
             </Pie>
             <Tooltip

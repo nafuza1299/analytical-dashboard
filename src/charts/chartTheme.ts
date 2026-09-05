@@ -6,7 +6,47 @@ import { useCallback, useMemo, useState } from 'react'
 // app ever needs to be locale-aware per user instead of fixed.
 export const LOCALE = 'id-ID'
 
-export const CHART_COLORS = ['#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed', '#0891b2']
+// ColorBrewer "Spectral" — a smooth rainbow ramp. No fixed palette gives 40+
+// perceptually distinct colors, so instead of cycling a short list (which
+// repeats every N items), each series gets its own point along this
+// continuous gradient: index i of N -> t = i/(N-1) -> interpolated color.
+// Adjacent-ranked series blend smoothly; far-apart ones stay clearly different.
+const SPECTRAL_STOPS = [
+  '#9e0142',
+  '#d53e4f',
+  '#f46d43',
+  '#fdae61',
+  '#fee08b',
+  '#ffffbf',
+  '#e6f598',
+  '#abdda4',
+  '#66c2a5',
+  '#3288bd',
+  '#5e4fa2',
+]
+
+function hexToRgb(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+function toHex(n: number): string {
+  return Math.round(n).toString(16).padStart(2, '0')
+}
+
+export function getSeriesColor(index: number, total: number): string {
+  const t = total <= 1 ? 0 : index / (total - 1)
+  const segment = t * (SPECTRAL_STOPS.length - 1)
+  const i0 = Math.floor(segment)
+  const i1 = Math.min(i0 + 1, SPECTRAL_STOPS.length - 1)
+  const localT = segment - i0
+  const [r0, g0, b0] = hexToRgb(SPECTRAL_STOPS[i0])
+  const [r1, g1, b1] = hexToRgb(SPECTRAL_STOPS[i1])
+  const r = r0 + (r1 - r0) * localT
+  const g = g0 + (g1 - g0) * localT
+  const b = b0 + (b1 - b0) * localT
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+}
 
 // English abbreviation letters (K/M/B/T) — id-ID's compact notation uses
 // "M" for miliar (billion) and "jt" for juta (million), which reads as the

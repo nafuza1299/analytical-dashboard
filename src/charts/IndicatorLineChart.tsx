@@ -3,7 +3,7 @@ import type { DataRow } from '../api/worldBank'
 import { pivotByYear } from './pivotByYear'
 import { ChartTooltipContent } from './ChartTooltipContent'
 import {
-  CHART_COLORS,
+  getSeriesColor,
   axisTickStyle,
   cursorLine,
   formatCompact,
@@ -105,7 +105,7 @@ export function IndicatorLineChart({ rows }: Props) {
           )}
         />
         {countries.map(([code, name], i) => {
-          const color = CHART_COLORS[i % CHART_COLORS.length]
+          const color = getSeriesColor(i, countries.length)
           return (
             <Line
               key={code}

@@ -32,4 +32,14 @@ describe('resolveFilterValue', () => {
   it('never crashes on a malformed cached value', () => {
     expect(() => resolveFilterValue(countriesFilter, { countries: '<script>' }, ['countries'])).not.toThrow()
   })
+
+  it('falls back to default when a cached value is not a string at all', () => {
+    // The cache is JSON, so its declared `string` values aren't enforced at
+    // runtime — a stale or hand-edited `filters.v1` holding the *parsed*
+    // shape (`yearRange: [2015, 2023]`) used to reach `raw.split(...)` and
+    // crash the app instead of resolving to the default.
+    const cached = { countries: ['SGP', 'MYS'], yearRange: [2015, 2023] } as never
+    expect(resolveFilterValue(countriesFilter, cached, ['countries'])).toEqual(countriesFilter.default)
+    expect(resolveFilterValue(yearRangeFilter, cached, ['yearRange'])).toEqual(yearRangeFilter.default)
+  })
 })

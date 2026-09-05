@@ -17,6 +17,11 @@ describe('nextLegendHidden', () => {
     expect(nextLegendHidden(isolated, KEYS, 'B', plain)).toEqual(new Set())
   })
 
+  it('shift click from all-selected isolates to the clicked key, same as a plain click', () => {
+    const hidden = nextLegendHidden(new Set(), KEYS, 'B', shift)
+    expect(hidden).toEqual(new Set(['A', 'C']))
+  })
+
   it('shift click toggles one key into the hidden set without touching others', () => {
     const hidden = nextLegendHidden(new Set(['A']), KEYS, 'B', shift)
     expect(hidden).toEqual(new Set(['A', 'B']))

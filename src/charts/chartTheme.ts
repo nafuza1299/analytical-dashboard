@@ -88,12 +88,16 @@ export type LegendClickEvent = { shiftKey?: boolean; ctrlKey?: boolean; metaKey?
 
 /** Plain click isolates to just that series (click it again to reset to "all
  * visible"). Shift+click toggles a series into/out of the current visible
- * set, for building up a custom multi-selection. Ctrl/Cmd+click explicitly
- * hides one series without touching the rest. Pure reducer, split out from
- * useLegendSelection below so the branching is unit-testable without React. */
+ * set, for building up a custom multi-selection — except from the "all
+ * selected" starting state, where toggling one off would just look like a
+ * plain-click isolate that missed a step, so it isolates to that key instead
+ * (same as a plain click). Ctrl/Cmd+click explicitly hides one series
+ * without touching the rest. Pure reducer, split out from useLegendSelection
+ * below so the branching is unit-testable without React. */
 export function nextLegendHidden(prev: Set<string>, allKeys: string[], key: string, event: LegendClickEvent) {
   if (event.ctrlKey || event.metaKey) return new Set(prev).add(key)
   if (event.shiftKey) {
+    if (prev.size === 0) return new Set(allKeys.filter((k) => k !== key))
     const next = new Set(prev)
     if (next.has(key)) next.delete(key)
     else next.add(key)

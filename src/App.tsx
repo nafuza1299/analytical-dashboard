@@ -151,7 +151,6 @@ function App() {
           }}
           open={mobileNavOpen}
           onOpenChange={setMobileNavOpen}
-          breakpoint="lg"
         />
       </AppLayout.Sider>
 

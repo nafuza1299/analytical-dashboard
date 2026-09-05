@@ -1,6 +1,10 @@
 # Analytical Dashboard
 
+[![CI](https://github.com/nafuza1299/analytical-dashboard/actions/workflows/ci.yml/badge.svg)](https://github.com/nafuza1299/analytical-dashboard/actions/workflows/ci.yml)
+
 > Portfolio project by [nafuza1299](https://github.com/nafuza1299). Live: [analytical-dashboard.vercel.app](https://analytical-dashboard.vercel.app/) · Source: [github.com/nafuza1299/analytical-dashboard](https://github.com/nafuza1299/analytical-dashboard) · [MIT License](LICENSE).
+
+[![The dashboard showing GDP for six countries: a multi-series line chart over 2015-2023, a bar chart of the latest year, a share-of-total pie chart, and the raw data table](docs/hero.png)](https://analytical-dashboard.vercel.app/)
 
 A static analytics dashboard over the [World Bank Indicators API](https://api.worldbank.org/v2) — no backend, no API key. Built to demonstrate the parts of a chart dashboard that don't come for free with a charting library — see "What this actually demonstrates" below.
 

@@ -1,120 +1,153 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { DataRow } from '../api/worldBank'
-import { Button } from '../catalyst-ui/components/Button/Button'
-import { formatFull } from './chartTheme'
+import { formatFull, indicatorSuffix, isCurrencyIndicator } from './chartTheme'
 
-type SortKey = 'countryName' | 'year' | 'value'
 type SortDir = 'asc' | 'desc'
 
-const PAGE_SIZE = 10
-
-const COLUMNS: { key: SortKey; label: string }[] = [
-  { key: 'countryName', label: 'Country' },
-  { key: 'year', label: 'Year' },
-  { key: 'value', label: 'Value' },
-]
+// ponytail: assumes every row is exactly ROW_HEIGHT tall (single line of
+// text-sm in px-3 py-2 cells) — if a cell ever wraps to multiple lines or
+// row height becomes dynamic, switch to measuring real row height (or a
+// virtualization library) instead of this fixed constant.
+const ROW_HEIGHT = 37
+const OVERSCAN = 5
+const CONTAINER_HEIGHT = 420
 
 interface Props {
   rows: DataRow[]
+  yearRange: [number, number]
 }
 
-export function DataTable({ rows }: Props) {
-  const [sortKey, setSortKey] = useState<SortKey>('year')
-  const [sortDir, setSortDir] = useState<SortDir>('desc')
-  const [page, setPage] = useState(0)
+interface CountryRow {
+  countryCode: string
+  countryName: string
+  values: Map<number, number | null>
+}
+
+export function computeVisibleRange(
+  scrollTop: number,
+  containerHeight: number,
+  rowHeight: number,
+  overscan: number,
+  totalRows: number,
+): { start: number; end: number } {
+  const clamp = (n: number) => Math.min(Math.max(n, 0), totalRows)
+  const start = clamp(Math.floor(scrollTop / rowHeight) - overscan)
+  const end = clamp(start + Math.ceil(containerHeight / rowHeight) + 2 * overscan)
+  return { start, end }
+}
+
+export function DataTable({ rows, yearRange }: Props) {
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [scrollTop, setScrollTop] = useState(0)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const isCurrency = isCurrencyIndicator(rows[0]?.indicatorCode)
+  const suffix = indicatorSuffix(rows[0]?.indicatorCode)
+
+  const years = useMemo(() => {
+    const [start, end] = yearRange
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+  }, [yearRange])
+
+  const countryRows = useMemo(() => {
+    const byCountry = new Map<string, CountryRow>()
+    for (const row of rows) {
+      let entry = byCountry.get(row.countryCode)
+      if (!entry) {
+        entry = { countryCode: row.countryCode, countryName: row.countryName, values: new Map() }
+        byCountry.set(row.countryCode, entry)
+      }
+      entry.values.set(row.year, row.value)
+    }
+    return Array.from(byCountry.values())
+  }, [rows])
 
   const sorted = useMemo(() => {
     const dir = sortDir === 'asc' ? 1 : -1
-    return [...rows].sort((a, b) => {
-      if (sortKey === 'value') {
-        // nulls always sort last, regardless of direction
-        if (a.value === null || b.value === null) return a.value === b.value ? 0 : a.value === null ? 1 : -1
-        return (a.value - b.value) * dir
-      }
-      if (sortKey === 'year') return (a.year - b.year) * dir
-      return a.countryName.localeCompare(b.countryName) * dir
-    })
-  }, [rows, sortKey, sortDir])
+    return [...countryRows].sort((a, b) => a.countryName.localeCompare(b.countryName) * dir)
+  }, [countryRows, sortDir])
 
-  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
-  const clampedPage = Math.min(page, pageCount - 1)
-  const pageRows = sorted.slice(clampedPage * PAGE_SIZE, clampedPage * PAGE_SIZE + PAGE_SIZE)
+  const { start, end } = computeVisibleRange(scrollTop, CONTAINER_HEIGHT, ROW_HEIGHT, OVERSCAN, sorted.length)
+  const visibleRows = sorted.slice(start, end)
+  const topPadding = start * ROW_HEIGHT
+  const bottomPadding = (sorted.length - end) * ROW_HEIGHT
 
-  const toggleSort = (key: SortKey) => {
-    if (key === sortKey) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
-    } else {
-      setSortKey(key)
-      setSortDir('asc')
-    }
-    setPage(0)
+  const toggleSort = () => {
+    setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    setScrollTop(0)
+    if (containerRef.current) containerRef.current.scrollTop = 0
   }
 
   return (
     <div>
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead className="border-b border-border">
+      <div
+        ref={containerRef}
+        className="overflow-x-auto overflow-y-auto"
+        style={{ maxHeight: CONTAINER_HEIGHT }}
+        onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
+      >
+        <table className="min-w-full border-collapse">
+          <thead className="sticky top-0 z-20 bg-surface border-b border-border">
             <tr>
-              {COLUMNS.map(({ key, label }) => (
-                <th key={key} className="text-left px-3 py-2 text-sm font-semibold text-text">
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
-                    onClick={() => toggleSort(key)}
-                  >
-                    {label}
-                    {sortKey === key ? (sortDir === 'asc' ? '▲' : '▼') : ''}
-                  </button>
+              <th className="sticky left-0 z-10 bg-surface text-left px-3 py-2 text-sm font-semibold text-text whitespace-nowrap">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
+                  onClick={toggleSort}
+                >
+                  Country
+                  {sortDir === 'asc' ? '▲' : '▼'}
+                </button>
+              </th>
+              {years.map((year) => (
+                <th
+                  key={year}
+                  className="text-left px-3 py-2 text-sm font-semibold text-text whitespace-nowrap"
+                >
+                  {year}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {pageRows.map((row) => (
-              <tr
-                key={`${row.countryCode}-${row.year}`}
-                className="border-b border-border hover:bg-surface-hover"
-              >
-                <td className="px-3 py-2 text-sm text-text">{row.countryName}</td>
-                <td className="px-3 py-2 text-sm text-text">{row.year}</td>
-                <td className="px-3 py-2 text-sm text-text">
-                  {row.value === null ? (
-                    <span className="text-text-muted italic">No data</span>
-                  ) : (
-                    formatFull(row.value)
-                  )}
+            {topPadding > 0 && (
+              <tr>
+                <td colSpan={years.length + 1} style={{ height: topPadding, padding: 0, border: 'none' }} />
+              </tr>
+            )}
+            {visibleRows.map((row) => (
+              <tr key={row.countryCode} className="border-b border-border hover:bg-surface-hover group">
+                <td className="sticky left-0 z-10 bg-surface group-hover:bg-surface-hover px-3 py-2 text-sm text-text whitespace-nowrap">
+                  {row.countryName}
                 </td>
+                {years.map((year) => {
+                  const value = row.values.get(year) ?? null
+                  return (
+                    <td key={year} className="px-3 py-2 text-sm text-text whitespace-nowrap">
+                      {value === null ? (
+                        <span className="text-text-muted italic">No data</span>
+                      ) : (
+                        <>
+                          {isCurrency && '$'}
+                          {formatFull(value)}
+                          {suffix}
+                        </>
+                      )}
+                    </td>
+                  )
+                })}
               </tr>
             ))}
+            {bottomPadding > 0 && (
+              <tr>
+                <td colSpan={years.length + 1} style={{ height: bottomPadding, padding: 0, border: 'none' }} />
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      <div className="flex items-center justify-between mt-3 text-sm text-text-muted">
-        <span>
-          {sorted.length === 0
-            ? 'No rows'
-            : `${clampedPage * PAGE_SIZE + 1}-${Math.min((clampedPage + 1) * PAGE_SIZE, sorted.length)} of ${sorted.length}`}
-        </span>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={clampedPage === 0}
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-          >
-            Prev
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={clampedPage >= pageCount - 1}
-            onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
-          >
-            Next
-          </Button>
-        </div>
+      <div className="mt-3 text-sm text-text-muted">
+        {sorted.length === 0 ? 'No rows' : `${sorted.length} ${sorted.length === 1 ? 'country' : 'countries'}`}
       </div>
     </div>
   )

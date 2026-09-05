@@ -315,7 +315,7 @@ function App() {
                   canCapture={canCapture}
                   periodLabel={periodLabel}
                 >
-                  <DataTable rows={data} />
+                  <DataTable rows={data} yearRange={values.yearRange} />
                 </ChartCard>
               </div>
             </PageChartGrid>

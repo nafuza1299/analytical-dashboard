@@ -119,8 +119,15 @@ export function useLegendSelection(allKeys: string[]) {
 
 // Legend text for a hidden series — greyed and struck through so the toggle
 // state is visible at a glance, on top of the click handling above.
+// userSelect: none stops shift+click (multi-select) from also selecting
+// text on the page, which is the browser's default shift+click behavior.
 export function legendItemStyle(hidden: boolean) {
-  return { opacity: hidden ? 0.5 : 1, textDecoration: hidden ? ('line-through' as const) : 'none', cursor: 'pointer' }
+  return {
+    opacity: hidden ? 0.5 : 1,
+    textDecoration: hidden ? ('line-through' as const) : 'none',
+    cursor: 'pointer',
+    userSelect: 'none' as const,
+  }
 }
 
 const TOOLTIP_MAX_HEIGHT = 280

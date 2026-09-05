@@ -36,7 +36,7 @@ export function IndicatorBarChart({ rows }: Props) {
           content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} suffix={suffix} />}
           {...tooltipProps}
         />
-        <Bar dataKey="value" fill="#2563eb" />
+        <Bar dataKey="value" name={yearRows[0]?.indicatorName} fill="#2563eb" />
       </BarChart>
     </ResponsiveContainer>
   )

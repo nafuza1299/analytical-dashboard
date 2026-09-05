@@ -11,6 +11,19 @@ export default defineConfig({
   test: {
     // src/catalyst-ui is copied straight from its own repo, complete with
     // its own Jest-based tests — not meant to run under this project's Vitest.
-    exclude: [...configDefaults.exclude, 'src/catalyst-ui/**'],
+    exclude: [...configDefaults.exclude, 'src/catalyst-ui/**', 'e2e/**'],
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    clearMocks: true,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**'],
+      exclude: [...configDefaults.exclude, 'src/catalyst-ui/**', 'src/main.tsx', 'src/**/*.test.{ts,tsx}'],
+      thresholds: {
+        branches: 80,
+        functions: 80,
+        lines: 80,
+      },
+    },
   },
 })

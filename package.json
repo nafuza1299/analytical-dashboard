@@ -3,11 +3,29 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "description": "A static analytics dashboard over the World Bank Indicators API — no backend, no API key.",
+  "author": "nafuza1299",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nafuza1299/analytical-dashboard.git"
+  },
+  "homepage": "https://analytical-dashboard.vercel.app/",
+  "keywords": [
+    "react",
+    "typescript",
+    "dashboard",
+    "recharts",
+    "vite",
+    "world-bank"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:coverage": "vitest run --coverage",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -24,10 +42,15 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "jsdom": "^30.0.1",
     "oxlint": "^1.79.0",
     "typescript": "~6.0.2",
     "vite": "^8.2.2",

@@ -1,7 +1,7 @@
 {
   "name": "analytical-dashboard",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "A static analytics dashboard over the World Bank Indicators API — no backend, no API key.",
   "author": "nafuza1299",
@@ -11,6 +11,9 @@
     "url": "https://github.com/nafuza1299/analytical-dashboard.git"
   },
   "homepage": "https://analytical-dashboard.vercel.app/",
+  "engines": {
+    "node": ">=24"
+  },
   "keywords": [
     "react",
     "typescript",

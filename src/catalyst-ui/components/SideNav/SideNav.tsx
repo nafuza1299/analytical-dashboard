@@ -160,11 +160,6 @@ export const SideNav = ({
       >
         <div className="flex h-full flex-col justify-between px-3 py-4">
           <div>
-            <div className="mb-4 px-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
-                Catalyst
-              </p>
-            </div>
             <ul className="space-y-1" aria-label="Main navigation">
               {loading ? <SideNavSkeletonItems /> : items.map((item) => (
                 <li key={item.key} className="list-none">
@@ -212,11 +207,6 @@ export const SideNav = ({
             .join(" ")}
         >
           <div className="flex h-full flex-col px-3 py-4">
-            <div className="mb-4 flex items-center justify-between px-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-text-muted">
-                Catalyst
-              </p>
-            </div>
             <ul className="space-y-1" aria-label="Mobile navigation">
               {loading ? <SideNavSkeletonItems /> : items.map((item) => (
                 <li key={item.key} className="list-none">

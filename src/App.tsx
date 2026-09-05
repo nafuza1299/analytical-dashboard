@@ -273,6 +273,7 @@ function App() {
                   exportFilename={filenameFor('line', 'xlsx')}
                   captureFilename={filenameFor('line', 'png')}
                   canCapture={canCapture}
+                  hasInteractiveLegend
                   periodLabel={periodLabel}
                 >
                   <IndicatorLineChart rows={data} />
@@ -297,6 +298,7 @@ function App() {
                   exportFilename={filenameFor('pie', 'xlsx')}
                   captureFilename={filenameFor('pie', 'png')}
                   canCapture={canCapture && pieRows.length > 0}
+                  hasInteractiveLegend
                   periodLabel={latestYearLabel}
                 >
                   <IndicatorPieChart rows={data} indicatorCode={indicatorCode} />

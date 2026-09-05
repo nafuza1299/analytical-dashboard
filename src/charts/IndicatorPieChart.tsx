@@ -5,6 +5,7 @@ import { isAdditiveIndicator } from './additiveIndicators'
 import { ChartTooltipContent } from './ChartTooltipContent'
 import {
   CHART_COLORS,
+  indicatorSuffix,
   isCurrencyIndicator,
   legendItemStyle,
   legendProps,
@@ -115,6 +116,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
   if (yearRows.length === 0) return null
   const year = yearRows[0].year
   const isCurrency = isCurrencyIndicator(indicatorCode)
+  const suffix = indicatorSuffix(indicatorCode)
   // Zeroing out a hidden country's value (instead of removing its row) keeps
   // it in the Pie's data — and therefore in the Legend, which derives its
   // items from that data — while recomputing every other slice's share of
@@ -144,7 +146,7 @@ export function IndicatorPieChart({ rows, indicatorCode }: Props) {
             </Pie>
             <Tooltip
               position={position}
-              content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} />}
+              content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} suffix={suffix} />}
               {...tooltipProps}
             />
             <Legend

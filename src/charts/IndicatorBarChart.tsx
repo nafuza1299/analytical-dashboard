@@ -7,6 +7,7 @@ import {
   cursorFill,
   formatCompact,
   gridStroke,
+  indicatorSuffix,
   isCurrencyIndicator,
   tooltipProps,
   useTooltipCenterY,
@@ -21,6 +22,7 @@ export function IndicatorBarChart({ rows }: Props) {
   const yearRows = latestYearRows(rows)
   if (yearRows.length === 0) return null
   const isCurrency = isCurrencyIndicator(rows[0]?.indicatorCode)
+  const suffix = indicatorSuffix(rows[0]?.indicatorCode)
 
   return (
     <ResponsiveContainer width="100%" height="100%" minHeight={200} onResize={onResize}>
@@ -31,7 +33,7 @@ export function IndicatorBarChart({ rows }: Props) {
         <Tooltip
           cursor={cursorFill}
           position={position}
-          content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} />}
+          content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} suffix={suffix} />}
           {...tooltipProps}
         />
         <Bar dataKey="value" fill="#2563eb" />

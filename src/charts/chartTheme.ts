@@ -34,6 +34,27 @@ export function isCurrencyIndicator(indicatorCode: string | undefined): boolean 
   return indicatorCode != null && CURRENCY_INDICATOR_CODES.has(indicatorCode)
 }
 
+// Tooltip suffix per indicator — same maintained-allowlist approach as
+// isCurrencyIndicator, since the API doesn't flag units itself. GDP is
+// omitted: it already gets a $ prefix and no suffix.
+const INDICATOR_SUFFIXES: Record<string, string> = {
+  'FP.CPI.TOTL.ZG': '%',
+  'NE.TRD.GNFS.ZS': '%',
+  'SH.XPD.CHEX.GD.ZS': '%',
+  'SE.PRM.ENRR': '%',
+  'SE.ADT.LITR.ZS': '%',
+  'SE.XPD.TOTL.GD.ZS': '%',
+  'SP.DYN.LE00.IN': ' yrs',
+  'SP.DYN.IMRT.IN': '‰', // per 1,000 live births
+  'EN.GHG.CO2.MT.CE.AR5': ' Mt',
+  'EG.USE.PCAP.KG.OE': ' kg',
+  'AG.LND.FRST.K2': ' km²',
+}
+
+export function indicatorSuffix(indicatorCode: string | undefined): string {
+  return (indicatorCode != null && INDICATOR_SUFFIXES[indicatorCode]) || ''
+}
+
 // Same font as Card.Title, sized down from the title's own size so axis
 // numbers don't compete with it (16px -> 10px -> +15% -> 12px).
 export const axisTickStyle = { fontFamily: 'var(--font-sans)', fontSize: 12 }

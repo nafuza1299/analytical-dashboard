@@ -8,6 +8,7 @@ import {
   cursorLine,
   formatCompact,
   gridStroke,
+  indicatorSuffix,
   isCurrencyIndicator,
   legendItemStyle,
   legendProps,
@@ -80,6 +81,7 @@ export function IndicatorLineChart({ rows }: Props) {
   const countries = [...new Map(rows.map((r) => [r.countryCode, r.countryName]))]
   const dotLabelerFor = makeSharedDotLabeler()
   const isCurrency = isCurrencyIndicator(rows[0]?.indicatorCode)
+  const suffix = indicatorSuffix(rows[0]?.indicatorCode)
   const { isHidden, onLegendClick } = useLegendSelection(countries.map(([code]) => code))
 
   return (
@@ -91,7 +93,7 @@ export function IndicatorLineChart({ rows }: Props) {
         <Tooltip
           cursor={cursorLine}
           position={position}
-          content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} />}
+          content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} suffix={suffix} />}
           {...tooltipProps}
         />
         <Legend

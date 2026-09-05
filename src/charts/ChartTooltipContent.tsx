@@ -20,9 +20,10 @@ const boxStyle = {
 
 interface Props extends TooltipContentProps {
   isCurrency?: boolean
+  suffix?: string
 }
 
-export function ChartTooltipContent({ active, payload, label, isCurrency }: Props) {
+export function ChartTooltipContent({ active, payload, label, isCurrency, suffix }: Props) {
   if (!active || !payload?.length) return null
   return (
     <div style={boxStyle}>
@@ -36,6 +37,7 @@ export function ChartTooltipContent({ active, payload, label, isCurrency }: Prop
             <span>
               {entry.name} : {isCurrency && '$'}
               {formatFull(Number(entry.value))}
+              {suffix}
             </span>
           </li>
         ))}

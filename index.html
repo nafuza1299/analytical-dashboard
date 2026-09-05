@@ -5,6 +5,22 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Analytical Dashboard</title>
+    <meta
+      name="description"
+      content="A static analytics dashboard over the World Bank Indicators API — filterable charts for GDP, inflation, life expectancy and more. No backend, no API key."
+    />
+    <!-- Absolute URLs: scrapers do not resolve relative paths. Points at the
+         production deploy, so a link shared from a preview deploy still
+         previews with the production image rather than a broken one. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Analytical Dashboard" />
+    <meta
+      property="og:description"
+      content="Filterable World Bank indicator charts — line, bar, share-of-total and raw data, with xlsx/PNG/PDF export."
+    />
+    <meta property="og:url" content="https://analytical-dashboard.vercel.app/" />
+    <meta property="og:image" content="https://analytical-dashboard.vercel.app/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
     <div id="root"></div>

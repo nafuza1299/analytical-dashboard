@@ -41,22 +41,32 @@ export function ChartCard({
         </hgroup>
         <div className="flex items-center gap-2">
           {hasInteractiveLegend && (
-            <Button variant="ghost" size="sm" iconOnly aria-label={LEGEND_HELP_TEXT} title={LEGEND_HELP_TEXT} className="cursor-help">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-4 w-4"
-                aria-hidden="true"
+            // Group-hover CSS tooltip instead of the native `title` attribute —
+            // `title` didn't reliably show a tooltip in testing.
+            <div className="relative group">
+              <Button variant="ghost" size="sm" iconOnly aria-label={LEGEND_HELP_TEXT} className="cursor-help">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <line x1="12" y1="10.5" x2="12" y2="16" />
+                  <circle cx="12" cy="7.5" r="1" fill="currentColor" stroke="none" />
+                </svg>
+              </Button>
+              <div
+                role="tooltip"
+                className="pointer-events-none absolute right-0 top-full z-20 mt-2 w-56 rounded-md border border-border bg-surface p-2 text-xs text-text opacity-0 shadow-elevation transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
               >
-                <circle cx="12" cy="12" r="9" />
-                <line x1="12" y1="10.5" x2="12" y2="16" />
-                <circle cx="12" cy="7.5" r="1" fill="currentColor" stroke="none" />
-              </svg>
-            </Button>
+                {LEGEND_HELP_TEXT}
+              </div>
+            </div>
           )}
           <ExportButton rows={exportRows} filename={exportFilename} />
           {canCapture && <CaptureButton targetRef={captureRef} filename={captureFilename} format="png" />}

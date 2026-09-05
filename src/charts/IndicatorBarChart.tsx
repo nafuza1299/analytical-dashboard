@@ -1,5 +1,6 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import type { DataRow } from '../api/worldBank'
+import { indicatorLabel } from '../navigation/menus'
 import { latestYearRows } from './latestYearRows'
 import { ChartTooltipContent } from './ChartTooltipContent'
 import {
@@ -36,7 +37,7 @@ export function IndicatorBarChart({ rows }: Props) {
           content={(props) => <ChartTooltipContent {...props} isCurrency={isCurrency} suffix={suffix} />}
           {...tooltipProps}
         />
-        <Bar dataKey="value" name={yearRows[0]?.indicatorName} fill="#2563eb" />
+        <Bar dataKey="value" name={indicatorLabel(rows[0]?.indicatorCode) ?? yearRows[0]?.indicatorName} fill="#2563eb" />
       </BarChart>
     </ResponsiveContainer>
   )

@@ -52,6 +52,17 @@ export const MENUS: MenuDef[] = [
   },
 ]
 
+const INDICATOR_LABELS: Record<string, string> = Object.fromEntries(
+  MENUS.flatMap((m) => m.tabs.map((t) => [t.indicatorCode, t.label])),
+)
+
+/** Short tab label (e.g. "GDP") for an indicator code, for places like chart
+ * tooltips where the API's own indicatorName (e.g. "GDP (current US$)") is
+ * too long. */
+export function indicatorLabel(indicatorCode: string | undefined): string | undefined {
+  return indicatorCode != null ? INDICATOR_LABELS[indicatorCode] : undefined
+}
+
 /** Resolves the active menu/tab from the URL path (menu key) and `tab` query
  * param, falling back to the first tab of the matched menu (or the first
  * menu/tab overall) when the path or tab is missing/unknown — e.g. a bare

@@ -39,7 +39,7 @@ type DotRenderProps = { cx?: number; cy?: number; value?: number | string; index
 // Shared across every series on the chart, so "hide overlap" suppresses
 // collisions between different countries' points too, not just within one
 // line's own years.
-function makeSharedDotLabeler() {
+function makeSharedDotLabeler(suffix: string) {
   const seenBuckets = new Set<string>()
   const decided = new Map<string, boolean>()
   return function dotLabelerFor(code: string, color: string) {
@@ -67,6 +67,7 @@ function makeSharedDotLabeler() {
               fill="var(--color-text-muted)"
             >
               {formatCompact(Number(value))}
+              {suffix}
             </text>
           )}
         </g>
@@ -79,9 +80,9 @@ export function IndicatorLineChart({ rows }: Props) {
   const { onResize, position } = useTooltipCenterY()
   const data = pivotByYear(rows)
   const countries = [...new Map(rows.map((r) => [r.countryCode, r.countryName]))]
-  const dotLabelerFor = makeSharedDotLabeler()
   const isCurrency = isCurrencyIndicator(rows[0]?.indicatorCode)
   const suffix = indicatorSuffix(rows[0]?.indicatorCode)
+  const dotLabelerFor = makeSharedDotLabeler(suffix)
   const { isHidden, onLegendClick } = useLegendSelection(countries.map(([code]) => code))
 
   return (

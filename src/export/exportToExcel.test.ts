@@ -21,6 +21,18 @@ describe('buildExportFilename', () => {
     )
   })
 
+  it('truncates a long indicator name at a word boundary', () => {
+    expect(
+      buildExportFilename('GDP per capita, PPP (current international $)', ['IDN'], [2015, 2024], 'line'),
+    ).toBe('gdp-per-capita-ppp_idn_2015-2024_line.xlsx')
+  })
+
+  it('collapses more than three countries into a count', () => {
+    expect(buildExportFilename('GDP', ['IDN', 'SGP', 'MYS', 'VNM'], [2015, 2024], 'bar')).toBe(
+      'gdp_4-countries_2015-2024_bar.xlsx',
+    )
+  })
+
   it('lowercases country codes and joins them with the year range and chart kind', () => {
     expect(buildExportFilename('Life expectancy at birth', ['VNM'], [2000, 2020], 'bar')).toBe(
       'life-expectancy-at-birth_vnm_2000-2020_bar.xlsx',

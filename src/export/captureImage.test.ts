@@ -26,7 +26,7 @@ describe('captureElementToPng', () => {
 
     await captureElementToPng(element, 'chart.png')
 
-    expect(html2canvasMock).toHaveBeenCalledWith(element, { backgroundColor: null, scale: 2 })
+    expect(html2canvasMock).toHaveBeenCalledWith(element, { backgroundColor: '#ffffff', scale: 2 })
     expect(anchorClick).toHaveBeenCalledOnce()
     anchorClick.mockRestore()
   })

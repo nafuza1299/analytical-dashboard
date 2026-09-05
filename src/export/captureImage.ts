@@ -1,7 +1,12 @@
 import html2canvas from 'html2canvas-pro'
 
+/** Reads the live theme token so captures match whichever theme is on screen. */
+function themeBackground(): string {
+  return getComputedStyle(document.documentElement).getPropertyValue('--color-bg').trim() || '#ffffff'
+}
+
 export async function captureElementToCanvas(element: HTMLElement): Promise<HTMLCanvasElement> {
-  return html2canvas(element, { backgroundColor: null, scale: 2 })
+  return html2canvas(element, { backgroundColor: themeBackground(), scale: 2 })
 }
 
 function downloadBlob(blob: Blob, filename: string) {
